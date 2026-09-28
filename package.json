@@ -1,0 +1,24 @@
+{
+  "name": "nwis-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NWIS — Nearby Wells Intelligence System for Oil India Limited (OIL) - Stage 01 Foundation",
+  "packageManager": "pnpm@10.30.3",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "db:generate": "pnpm --filter @nwis/database db:generate",
+    "db:push": "pnpm --filter @nwis/database db:push",
+    "db:migrate": "pnpm --filter @nwis/database db:migrate",
+    "db:seed": "pnpm --filter @nwis/database db:seed",
+    "clean": "turbo run clean && rimraf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.2",
+    "rimraf": "^6.0.1"
+  }
+}

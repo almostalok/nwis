@@ -1,0 +1,34 @@
+================================================================================
+OIL INDIA LIMITED — MUD LOGGING & FLUID SERVICES
+MUD LOG & INCIDENT REPORT — SYNTHETIC RECORD
+================================================================================
+Well Identifier: OIL-SYN-005
+Well Name: NWIS Precedent Well 05 (Lost Circulation)
+Field: NWIS-DEMO-FIELD
+Date: 09-JUL-2023
+Interval: 2100 m to 2150 m MD
+Formation: Tipam Sandstone
+
+MUD LOSS INCIDENT LOG:
+- At 05:45 hrs on 08-JUL-2023, while drilling through upper Tipam Sandstone at 2125 m MD, 
+  active pit volume dropped abruptly from 65 m3 to 42 m3 (23 m3 total loss in 20 min).
+- Mud return flow line paddle sensor indicated 0% returns.
+- Standpipe pressure dropped from 165 bar to 135 bar.
+
+FLUID PROPERTIES AT TIME OF LOSS:
+- Fluid Type: Dispersed Bentonite Lignite System
+- Mud Weight: 1.16 sg
+- Funnel Viscosity: 48 sec/qt
+- Gel Strengths (10s/10m): 8/18 lb/100ft2
+- API Filtrate: 6.5 ml/30min
+
+TREATMENT & MITIGATION:
+1. Driller halted rotation, picked off bottom to 2100 m casing shoe, stopped pumps.
+2. Formulated 18 m3 LCM bridging blend:
+   - 25 ppb fine & medium Calcium Carbonate
+   - 15 ppb Nut Plug (walnut shell coarse)
+   - 5 ppb synthetic cellulose fibers
+3. Pumped LCM pill in two 9 m3 stages; allowed 4 hours static soak.
+4. Slowly resumed circulation at 600 lpm, building up to 1800 lpm with 100% returns restored.
+5. Adjusted continuous mud density to 1.12 sg to reduce hydrostatic overbalance.
+================================================================================

@@ -1,0 +1,35 @@
+================================================================================
+OIL INDIA LIMITED — DRILLING & EXPLORATION SERVICES
+FINAL WELL COMPLETION REPORT (WCR) — SYNTHETIC RECORD
+================================================================================
+Well Name: NWIS Discovery Well 03
+Identifier: OIL-SYN-003
+Field: NWIS-DEMO-FIELD
+Spud Date: 10-MAR-2023 | Completion Date: 02-JUL-2023
+Total Depth: 4250.0 m MD / 4150.0 m TVD
+Status: COMPLETED (OIL PRODUCING WELL)
+
+STRATIGRAPHY ENCOUNTERED:
+Alluvium:              0.0 m to 460.0 m MD
+Girujan Clay:        460.0 m to 1180.0 m MD
+Tipam Sandstone:    1180.0 m to 2380.0 m MD (Major Pay Zone 1)
+Surma Group:        2380.0 m to 2880.0 m MD
+Barail Sandstone:   2880.0 m to 3480.0 m MD (Primary Reservoir & High Stress Zone)
+Kopili Shale:       3480.0 m to 4000.0 m MD
+Jaintia Limestone:  4000.0 m to 4250.0 m MD (Secondary Reservoir)
+
+CASING RECORD:
+20" Conductor set at 100 m MD
+13-3/8" Surface Casing set at 1170 m MD
+9-5/8" Intermediate Casing set at 2870 m MD
+7" Production Casing set at 4240 m MD (TOC at 2680 m MD)
+
+SIGNIFICANT DRILLING EVENTS:
+- 14-APR-2023: High-severity STUCK_PIPE incident at 3210 m MD in Barail Sandstone.
+  Overpull reached 60 tonnes. Freed after 54 hours of jarring and spotting 12 m3 
+  lubricant pill. Total NPT: 68 hours.
+
+COMPLETION INTERVAL:
+Perforated Barail Main Sand: 3260 m - 3285 m MD. Initial production test 
+yielded 420 bopd clean oil on 16/64" choke.
+================================================================================

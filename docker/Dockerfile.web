@@ -1,0 +1,18 @@
+FROM node:22-alpine AS builder
+
+RUN npm install -g pnpm@10.30.3
+
+WORKDIR /app
+COPY pnpm-workspace.yaml package.json turbo.json pnpm-lock.yaml* ./
+COPY packages ./packages
+COPY apps/web ./apps/web
+
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @nwis/database db:generate
+RUN pnpm --filter @nwis/types build
+RUN pnpm --filter @nwis/utils build
+RUN pnpm --filter @nwis/api-client build
+RUN pnpm --filter @nwis/web build
+
+EXPOSE 3000
+CMD ["pnpm", "--filter", "@nwis/web", "start"]

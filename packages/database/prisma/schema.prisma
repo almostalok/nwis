@@ -1,0 +1,412 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum WellType {
+  EXPLORATION
+  DEVELOPMENT
+  APPRAISAL
+  WILDCAT
+  STRATIGRAPHIC
+}
+
+enum WellStatus {
+  PLANNED
+  DRILLING
+  COMPLETED
+  SUSPENDED
+  ABANDONED
+}
+
+enum EventType {
+  LOST_CIRCULATION
+  KICK
+  STUCK_PIPE
+  FISHING
+  NPT
+  TORQUE_SPIKE
+  PRESSURE_ANOMALY
+  FORMATION_INSTABILITY
+  CASING_EVENT
+  CEMENTING_EVENT
+  EQUIPMENT_FAILURE
+  OTHER
+}
+
+enum EventSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum QualityStatus {
+  VALID
+  WARNING
+  INVALID
+  UNVERIFIED
+  VERIFIED
+}
+
+enum DocumentType {
+  WCR
+  DDR
+  MUD_REPORT
+  GEOLOGICAL_REPORT
+  CEMENTING_REPORT
+  CASING_REPORT
+  DRILLING_REPORT
+  INCIDENT_REPORT
+  OTHER
+}
+
+enum DocumentProcessingStatus {
+  UPLOADED
+  QUEUED
+  PROCESSING
+  PROCESSED
+  FAILED
+  VERIFIED
+}
+
+enum DataSourceType {
+  SYNTHETIC
+  CSV
+  EXCEL
+  WITSML
+  ERTMAC
+  DOCUMENT
+  API
+}
+
+enum UserRole {
+  ADMIN
+  DRILLING_ENGINEER
+  GEOLOGIST
+  MANAGER
+  DATA_ENGINEER
+  VIEWER
+}
+
+enum AuditAction {
+  LOGIN
+  DATA_IMPORT
+  DATA_UPDATE
+  DOCUMENT_UPLOAD
+  EVENT_UPDATE
+  USER_UPDATE
+}
+
+model Well {
+  id              String         @id @default(uuid())
+  wellId          String         @unique
+  name            String
+  field           String
+  operator        String         @default("Oil India Limited (Synthetic)")
+  wellType        WellType       @default(DEVELOPMENT)
+  status          WellStatus     @default(DRILLING)
+  spudDate        DateTime?
+  completionDate  DateTime?
+  totalDepth      Float          // in meters canonical
+  latitude        Float
+  longitude       Float
+  qualityStatus   QualityStatus  @default(VALID)
+  qualityScore    Float          @default(1.0)
+  sourceId        String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  trajectoryPoints   WellTrajectoryPoint[]
+  formations         FormationInterval[]
+  drillingParameters DrillingParameterSample[]
+  mudSamples         MudSample[]
+  events             OperationalEvent[]
+  casingSections     CasingSection[]
+  cementingJobs      CementingJob[]
+  documents          Document[]
+
+  @@index([field])
+  @@index([status])
+  @@index([latitude, longitude])
+  @@map("wells")
+}
+
+model WellTrajectoryPoint {
+  id                String    @id @default(uuid())
+  wellId            String
+  measuredDepth     Float     // in meters canonical
+  trueVerticalDepth Float     // in meters canonical
+  inclination       Float     // degrees (0 - 180)
+  azimuth           Float     // degrees (0 - 360)
+  latitude          Float?
+  longitude         Float?
+  northing          Float?
+  easting           Float?
+  dogLegSeverity    Float?    // deg/30m
+  timestamp         DateTime?
+  createdAt         DateTime  @default(now())
+
+  well Well @relation(fields: [wellId], references: [id], onDelete: Cascade)
+
+  @@index([wellId, measuredDepth])
+  @@map("well_trajectory_points")
+}
+
+model FormationInterval {
+  id            String        @id @default(uuid())
+  wellId        String
+  formationName String
+  topDepth      Float         // in meters canonical
+  bottomDepth   Float         // in meters canonical
+  topTVD        Float?
+  bottomTVD     Float?
+  lithology     String
+  reservoir     Boolean       @default(false)
+  confidence    Float         @default(1.0)
+  sourceId      String?
+  qualityStatus QualityStatus @default(VALID)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  well   Well               @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  events OperationalEvent[]
+
+  @@index([wellId])
+  @@index([formationName])
+  @@index([topDepth, bottomDepth])
+  @@map("formation_intervals")
+}
+
+model DrillingParameterSample {
+  id                String        @id @default(uuid())
+  wellId            String
+  timestamp         DateTime
+  measuredDepth     Float         // in meters canonical
+  rop               Float?        // Rate of Penetration (m/h)
+  wob               Float?        // Weight on Bit (kN)
+  rpm               Float?        // Rotary RPM
+  torque            Float?        // Torque (kN.m)
+  hookLoad          Float?        // Hook Load (kN)
+  standpipePressure Float?        // Standpipe Pressure (bar)
+  flowRate          Float?        // Flow Rate (lpm)
+  blockPosition     Float?        // Block Position (m)
+  blockSpeed        Float?        // Block Speed (m/s)
+  additionalTags    Json?         // Flexible sensor extensions
+  qualityStatus     QualityStatus @default(VALID)
+  createdAt         DateTime      @default(now())
+
+  well Well @relation(fields: [wellId], references: [id], onDelete: Cascade)
+
+  @@index([wellId, measuredDepth])
+  @@index([wellId, timestamp])
+  @@map("drilling_parameter_samples")
+}
+
+model MudSample {
+  id                   String        @id @default(uuid())
+  wellId               String
+  timestamp            DateTime
+  measuredDepth        Float         // in meters canonical
+  mudWeight            Float?        // specific gravity (sg) canonical
+  plasticViscosity     Float?        // cP
+  yieldPoint           Float?        // lb/100ft2
+  funnelViscosity      Float?        // sec/qt
+  fluidLoss            Float?        // ml/30min
+  ph                   Float?
+  chlorides            Float?        // mg/l
+  solids               Float?        // % vol
+  flowRate             Float?        // lpm
+  pitVolume            Float?        // m3
+  gasReading           Float?        // units
+  additionalProperties Json?
+  qualityStatus        QualityStatus @default(VALID)
+  createdAt            DateTime      @default(now())
+
+  well Well @relation(fields: [wellId], references: [id], onDelete: Cascade)
+
+  @@index([wellId, measuredDepth])
+  @@index([wellId, timestamp])
+  @@map("mud_samples")
+}
+
+model OperationalEvent {
+  id                   String        @id @default(uuid())
+  wellId               String
+  eventType            EventType
+  severity             EventSeverity
+  startDepth           Float         // in meters canonical
+  endDepth             Float?        // in meters canonical
+  startTime            DateTime?
+  endTime              DateTime?
+  formationId          String?
+  description          String
+  rootCause            String?
+  mitigation           String?
+  outcome              String?
+  confidence           Float         @default(1.0)
+  sourceDocumentId     String?
+  sourcePage           Int?
+  sourceLocation       String?
+  extractionMethod     String?       @default("MANUAL")
+  extractionConfidence Float?        @default(1.0)
+  verifiedBy           String?
+  verifiedAt           DateTime?
+  qualityStatus        QualityStatus @default(VALID)
+  qualityScore         Float         @default(1.0)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  well      Well               @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  formation FormationInterval? @relation(fields: [formationId], references: [id], onDelete: SetNull)
+  document  Document?          @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+
+  @@index([wellId])
+  @@index([eventType])
+  @@index([startDepth])
+  @@index([formationId])
+  @@map("operational_events")
+}
+
+model CasingSection {
+  id               String   @id @default(uuid())
+  wellId           String
+  section          String
+  casingSize       Float    // in inches, e.g. 13.375
+  settingDepth     Float    // meters canonical
+  topDepth         Float
+  bottomDepth      Float
+  grade            String?
+  weight           Float?
+  cementTop        Float?
+  cementBottom     Float?
+  sourceDocumentId String?
+  createdAt        DateTime @default(now())
+
+  well          Well           @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  cementingJobs CementingJob[]
+
+  @@index([wellId])
+  @@map("casing_sections")
+}
+
+model CementingJob {
+  id                 String    @id @default(uuid())
+  wellId             String
+  casingId           String?
+  jobDate            DateTime?
+  topDepth           Float
+  bottomDepth        Float
+  cementVolume       Float?    // m3
+  cementDensity      Float?    // sg
+  slurryType         String?
+  displacementVolume Float?
+  jobStatus          String    @default("SUCCESS")
+  remarks            String?
+  sourceDocumentId   String?
+  createdAt          DateTime  @default(now())
+
+  well   Well           @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  casing CasingSection? @relation(fields: [casingId], references: [id], onDelete: SetNull)
+
+  @@index([wellId])
+  @@map("cementing_jobs")
+}
+
+model Document {
+  id               String                   @id @default(uuid())
+  wellId           String?
+  documentType     DocumentType
+  title            String
+  fileName         String
+  mimeType         String
+  storagePath      String
+  documentDate     DateTime?
+  pageCount        Int?
+  processingStatus DocumentProcessingStatus @default(PROCESSED)
+  extractionStatus String?                  @default("COMPLETED")
+  checksum         String?
+  sourceSystem     String?                  @default("NWIS-LOCAL-STORE")
+  metadata         Json?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  well   Well?              @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  events OperationalEvent[]
+
+  @@index([wellId])
+  @@index([documentType])
+  @@map("documents")
+}
+
+model DataSource {
+  id             String         @id @default(uuid())
+  name           String
+  type           DataSourceType
+  description    String?
+  version        String?
+  connectionType String?
+  active         Boolean        @default(true)
+  metadata       Json?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("data_sources")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         UserRole  @default(VIEWER)
+  department   String?   @default("Drilling Services")
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  userId     String?
+  action     AuditAction
+  entityType String
+  entityId   String?
+  timestamp  DateTime    @default(now())
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
+
+model IngestionJobRecord {
+  id               String         @id @default(uuid())
+  sourceType       DataSourceType
+  sourceIdentifier String
+  status           String         @default("PENDING")
+  totalRecords     Int            @default(0)
+  processedRecords Int            @default(0)
+  validRecords     Int            @default(0)
+  invalidRecords   Int            @default(0)
+  errors           Json?
+  startedAt        DateTime       @default(now())
+  completedAt      DateTime?
+  metadata         Json?
+
+  @@map("ingestion_jobs")
+}

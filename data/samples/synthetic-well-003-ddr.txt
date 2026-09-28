@@ -1,0 +1,61 @@
+================================================================================
+OIL INDIA LIMITED — DRILLING SERVICES (SYNTHETIC OPERATIONS)
+DAILY DRILLING REPORT (DDR) — SYNTHETIC DEMO RECORD
+================================================================================
+Well ID: OIL-SYN-003
+Well Name: NWIS Precedent Well 03
+Field: NWIS-DEMO-FIELD (Fictional Upper Assam Clustered Basin)
+Report Date: 15-APR-2023
+Rig: SYN-RIG-04
+Current Depth: 3210 m MD / 3192 m TVD
+24-Hour Progress: 30 m (Drilling halted due to stuck drill string)
+
+GEOLOGICAL SUMMARY:
+Formation: Barail Sandstone (Top: 2880 m MD, Est. Bottom: 3480 m MD)
+Lithology: Fine-grained quartzose sandstone interbedded with carbonaceous, 
+           fissile dark gray shale.
+
+OPERATIONAL SUMMARY (06:00 to 06:00):
+06:00 - 09:30: Rotary drilling 8-1/2" hole from 3180 m to 3198 m MD.
+               Parameters: WOB: 110-125 kN, RPM: 115-120, ROP: 9-14 m/h.
+               Standpipe Pressure: 190-205 bar, Flow Rate: 2200 lpm.
+               Torque baseline: 11.5 kN.m with minor fluctuations.
+
+09:30 - 11:15: Drilling 3198 m to 3208 m MD.
+               Observed gradual increase in rotary torque from 11.5 to 18.4 kN.m.
+               Torque became erratic with periodic spikes up to 26.8 kN.m.
+               ROP decayed progressively from 14.5 m/h to 4.1 m/h.
+               Elevated drag observed during connection attempts (+15 tonnes).
+
+11:15 - 12:00: Drilling 3208 m to 3210 m MD.
+               Torque spiked sharply to 34.5 kN.m (top drive stalled at 40 RPM).
+               Driller initiated immediate pickup. Drillstring came to abrupt stop 
+               at 3210 m MD. Overpull reached 60 tonnes above normal string weight 
+               (hookload 1250 kN). Unable to reciprocate or rotate string. Full 
+               mud circulation maintained at 1900 lpm at 245 bar.
+
+12:00 - 18:00: Declared INCIDENT: STUCK_PIPE (Severity: HIGH).
+               Root Cause Analysis: Differential sticking across high-permeability 
+               Barail Sandstone interval aggravated by mechanical wedge of reactive 
+               carbonaceous shale fragments accumulating around BHA stabilizers.
+               Mitigation Plan:
+               1. Maintained low-rate mud circulation to prevent further packoff.
+               2. Mixed and spotted 12 m3 organic oil-based lubricant soaking pill 
+                  across BHA depth interval (3150 - 3210 m).
+               3. Began controlled downward and upward hydraulic jarring operations 
+                  using 6-1/2" double-acting drilling jars.
+
+MUD PROPERTIES:
+Mud Type: Water-Based Potassium Glycol Polymer Mud
+Mud Weight: 1.27 sg (10.6 ppg)
+Viscosity: 62 sec/qt | Plastic Viscosity: 28 cP | Yield Point: 26 lb/100ft2
+Filtrate Loss: 8.5 ml/30min (Target was <6.0 ml)
+pH: 9.2 | Chlorides: 3900 mg/l | Sand Content: 0.4%
+
+PROVENANCE & VERIFICATION:
+Source Document: synthetic-well-003-ddr.txt
+Report Author: P. K. Gogoi (Tour Pusher)
+Verified By: S. K. Saikia (Senior Drilling Engineer, OIL Synthetic Ops)
+Verification Status: VERIFIED
+Confidence Score: 0.99
+================================================================================

@@ -1,0 +1,30 @@
+{
+  "name": "@nwis/database",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx src/seed.ts",
+    "test": "tsx ../../tests/e2e-test-suite.ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "@nwis/types": "workspace:*",
+    "@nwis/utils": "workspace:*",
+    "@nwis/validation": "workspace:*",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@nwis/config": "workspace:*",
+    "prisma": "^6.4.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "rimraf": "^6.0.1"
+  }
+}

@@ -1,0 +1,26 @@
+================================================================================
+OIL INDIA LIMITED — DRILLING SERVICES (SYNTHETIC OPERATIONS)
+DAILY DRILLING REPORT (DDR) — SYNTHETIC DEMO RECORD
+================================================================================
+Well ID: OIL-SYN-012
+Well Name: NWIS Precedent Well 12 (Barail Correlation Precedent)
+Field: NWIS-DEMO-FIELD
+Report Date: 11-JAN-2024
+Rig: SYN-RIG-05
+Current Depth: 3205 m MD / 3185 m TVD
+
+INCIDENT SUMMARY & PRECEDENT ANALYSIS:
+At 3205 m MD in Barail Sandstone, third recurrent stuck pipe occurrence recorded 
+in this structural block. Precursor signature mirrored OIL-SYN-003 (at 3210 m) 
+and OIL-SYN-007 (at 3180 m):
+- Torque accelerated from 11.2 kN.m baseline to 33.8 kN.m
+- ROP dropped from 14.8 m/h to 0.6 m/h within 45 minutes
+- Rotary table bogged down at 35 RPM
+- String locked tight upon connection pickup
+
+MITIGATION:
+Spotted 14 m3 low-viscosity surfactant soaking pill. Initiated continuous hydraulic 
+jarring. Pipe freed after 45 hours. Sidetrack avoided. Recommended spiral BHA 
+stabilizers and increased KCl-glycol inhibition for all future wells traversing 
+Barail Sandstone interval 3150-3250 m.
+================================================================================
