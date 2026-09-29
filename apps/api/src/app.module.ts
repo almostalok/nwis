@@ -8,6 +8,8 @@ import { DataQualityModule } from './data-quality/data-quality.module';
 import { AuditModule } from './audit/audit.module';
 import { StorageModule } from './storage/storage.module';
 import { WitsmlModule } from './witsml/witsml.module';
+import { KnowledgeModule } from './knowledge/knowledge.module';
+import { IntelligenceModule } from './intelligence/intelligence.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { WitsmlModule } from './witsml/witsml.module';
     AuditModule,
     StorageModule,
     WitsmlModule,
+    KnowledgeModule,
+    IntelligenceModule,
   ],
 })
 export class AppModule {}

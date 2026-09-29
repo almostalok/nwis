@@ -10,10 +10,12 @@
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "test": "turbo run test",
+    "test:stage02": "tsx tests/stage02-verification-suite.ts",
     "db:generate": "pnpm --filter @nwis/database db:generate",
     "db:push": "pnpm --filter @nwis/database db:push",
     "db:migrate": "pnpm --filter @nwis/database db:migrate",
     "db:seed": "pnpm --filter @nwis/database db:seed",
+    "db:seed:stage02": "pnpm --filter @nwis/database db:seed:stage02",
     "clean": "turbo run clean && rimraf node_modules"
   },
   "devDependencies": {

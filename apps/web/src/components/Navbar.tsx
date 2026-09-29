@@ -54,7 +54,7 @@ export function Navbar() {
             Fictional synthetic dataset (NWIS-DEMO-FIELD) designed for Oil India Limited (OIL).
           </span>
         </div>
-        <span className="font-mono text-[11px] text-amber-400/80">Stage 01: Foundation Platform</span>
+        <span className="font-mono text-[11px] text-amber-400/80">Stage 02: AI Intelligence & Precedent Engine</span>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -75,13 +75,21 @@ export function Navbar() {
             </a>
 
             <nav className="hidden md:flex space-x-1">
-              {navLinks.map((link) => {
-                const isActive = pathname === link.href || pathname?.startsWith(link.href + '/');
+              {[
+                { href: '/dashboard', label: 'Dashboard' },
+                { href: '/wells', label: 'Wells' },
+                { href: '/search', label: 'Semantic Search' },
+                { href: '/compare', label: 'Well Compare' },
+                { href: '/knowledge', label: 'Knowledge Base' },
+                { href: '/events', label: 'Events' },
+                { href: '/data', label: 'Data Platform' },
+              ].map((link) => {
+                const isActive = pathname === link.href || (link.href !== '/dashboard' && pathname?.startsWith(link.href));
                 return (
                   <a
                     key={link.href}
                     href={link.href}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                       isActive
                         ? 'bg-petro-800 text-emerald-400 font-semibold'
                         : 'text-slate-300 hover:text-white hover:bg-petro-900'

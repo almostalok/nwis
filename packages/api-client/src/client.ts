@@ -167,6 +167,9 @@ export class NwisApiClient {
         method: 'POST',
         body: JSON.stringify(data),
       }),
+
+    getById: (id: string): Promise<OperationalEvent> =>
+      this.request<OperationalEvent>(`/api/v1/events/${id}`),
   };
 
   // --- Data Ingestion & Quality ---
@@ -186,5 +189,44 @@ export class NwisApiClient {
   readonly audit = {
     list: (limit?: number): Promise<AuditLogRecord[]> =>
       this.request<AuditLogRecord[]>(`/api/v1/audit-logs${limit ? `?limit=${limit}` : ''}`),
+  };
+
+  // --- Stage 02: Knowledge & Document Intelligence ---
+  readonly knowledge = {
+    listDocuments: (wellId?: string): Promise<any[]> =>
+      this.request<any[]>(`/api/v1/knowledge/documents${wellId ? `?wellId=${wellId}` : ''}`),
+    getDocument: (id: string): Promise<any> =>
+      this.request<any>(`/api/v1/knowledge/documents/${id}`),
+    processAll: (): Promise<any> =>
+      this.request<any>('/api/v1/knowledge/process-all', { method: 'POST' }),
+    processDocument: (id: string): Promise<any> =>
+      this.request<any>(`/api/v1/knowledge/process/${id}`, { method: 'POST' }),
+  };
+
+  // --- Stage 02: Drilling Intelligence & Precedents ---
+  readonly intelligence = {
+    search: (query: any): Promise<any> =>
+      this.request<any>('/api/v1/intelligence/search', {
+        method: 'POST',
+        body: JSON.stringify(query),
+      }),
+    precedents: (query: any): Promise<any> =>
+      this.request<any>('/api/v1/intelligence/precedents', {
+        method: 'POST',
+        body: JSON.stringify(query),
+      }),
+    ask: (query: any): Promise<any> =>
+      this.request<any>('/api/v1/intelligence/ask', {
+        method: 'POST',
+        body: JSON.stringify(query),
+      }),
+    getSummary: (wellId: string): Promise<any> =>
+      this.request<any>(`/api/v1/intelligence/wells/${wellId}/summary`),
+    getNearby: (wellId: string, limit?: number): Promise<any[]> =>
+      this.request<any[]>(`/api/v1/intelligence/wells/${wellId}/nearby${limit ? `?limit=${limit}` : ''}`),
+    getTimeline: (wellId: string): Promise<any> =>
+      this.request<any>(`/api/v1/intelligence/wells/${wellId}/timeline`),
+    compare: (wellA: string, wellB: string): Promise<any> =>
+      this.request<any>(`/api/v1/intelligence/compare?wellA=${encodeURIComponent(wellA)}&wellB=${encodeURIComponent(wellB)}`),
   };
 }

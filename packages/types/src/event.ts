@@ -29,6 +29,14 @@ export interface OperationalEvent {
   qualityStatus: QualityStatus;
   qualityScore: number;
 
+  // Stage 02 Intelligence & Precedent fields
+  precedingIndicators?: string[] | null;
+  problemDescription?: string | null;
+  mitigationAction?: string | null;
+  lessonsLearned?: string | null;
+  dedupKey?: string | null;
+  evidence?: any[];
+
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -56,6 +64,11 @@ export interface CreateOperationalEventDto {
   verifiedAt?: string | null;
   qualityStatus?: QualityStatus;
   qualityScore?: number;
+  precedingIndicators?: string[] | null;
+  problemDescription?: string | null;
+  mitigationAction?: string | null;
+  lessonsLearned?: string | null;
+  dedupKey?: string | null;
 }
 
 export interface DepthEventsQueryDto {

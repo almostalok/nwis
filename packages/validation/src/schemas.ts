@@ -215,3 +215,43 @@ export const ingestionImportSchema = z.object({
   ]),
   payload: z.any(),
 });
+
+// ================= STAGE 02 INTELLIGENCE SCHEMAS =================
+export const hybridSearchQuerySchema = z.object({
+  query: z.string().min(1, 'Search query cannot be empty'),
+  wellId: z.string().optional(),
+  radiusKm: z.coerce.number().positive().max(500).optional(),
+  formation: z.string().optional(),
+  depth: z.coerce.number().min(0).optional(),
+  eventType: z.nativeEnum(EventType).optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+});
+
+export const precedentQuerySchema = z.object({
+  wellId: z.string().optional(),
+  targetDepth: z.coerce.number().min(0, 'Depth cannot be negative'),
+  formationName: z.string().optional(),
+  radiusKm: z.coerce.number().positive().max(500).default(25),
+  parameters: z
+    .object({
+      torque: z.number().optional(),
+      rop: z.number().optional(),
+      wob: z.number().optional(),
+      rpm: z.number().optional(),
+      standpipePressure: z.number().optional(),
+    })
+    .optional(),
+});
+
+export const ragQuerySchema = z.object({
+  question: z.string().min(2, 'Question must be at least 2 characters'),
+  currentWellId: z.string().optional(),
+  currentDepth: z.coerce.number().min(0).optional(),
+  currentFormation: z.string().optional(),
+});
+
+export const crossWellCompareQuerySchema = z.object({
+  wellA: z.string().min(1, 'Well A ID is required'),
+  wellB: z.string().min(1, 'Well B ID is required'),
+});
+

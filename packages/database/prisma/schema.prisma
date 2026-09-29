@@ -69,9 +69,17 @@ enum DocumentProcessingStatus {
   UPLOADED
   QUEUED
   PROCESSING
+  TEXT_EXTRACTION
+  OCR_PROCESSING
+  CHUNKING
+  ENTITY_EXTRACTION
+  EVENT_EXTRACTION
+  EMBEDDING
   PROCESSED
+  COMPLETED
   FAILED
   VERIFIED
+  VERIFICATION_REQUIRED
 }
 
 enum DataSourceType {
@@ -258,17 +266,24 @@ model OperationalEvent {
   verifiedAt           DateTime?
   qualityStatus        QualityStatus @default(VALID)
   qualityScore         Float         @default(1.0)
+  precedingIndicators  Json?         // e.g. ["TORQUE_SPIKE", "ROP_DECREASE", "DRAG_INCREASE"]
+  problemDescription  String?
+  mitigationAction     String?
+  lessonsLearned       String?
+  dedupKey             String?       // Canonical hash for event deduplication
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
 
-  well      Well               @relation(fields: [wellId], references: [id], onDelete: Cascade)
-  formation FormationInterval? @relation(fields: [formationId], references: [id], onDelete: SetNull)
-  document  Document?          @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  well      Well                      @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  formation FormationInterval?        @relation(fields: [formationId], references: [id], onDelete: SetNull)
+  document  Document?                 @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  evidence  HistoricalEventEvidence[]
 
   @@index([wellId])
   @@index([eventType])
   @@index([startDepth])
   @@index([formationId])
+  @@index([dedupKey])
   @@map("operational_events")
 }
 
@@ -327,20 +342,81 @@ model Document {
   storagePath      String
   documentDate     DateTime?
   pageCount        Int?
-  processingStatus DocumentProcessingStatus @default(PROCESSED)
+  processingStatus DocumentProcessingStatus @default(COMPLETED)
   extractionStatus String?                  @default("COMPLETED")
+  ocrConfidence    Float?                   @default(1.0)
   checksum         String?
   sourceSystem     String?                  @default("NWIS-LOCAL-STORE")
   metadata         Json?
   createdAt        DateTime                 @default(now())
   updatedAt        DateTime                 @updatedAt
 
-  well   Well?              @relation(fields: [wellId], references: [id], onDelete: Cascade)
-  events OperationalEvent[]
+  well               Well?                     @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  events             OperationalEvent[]
+  chunks             DocumentChunk[]
+  evidence           HistoricalEventEvidence[]
+  extractedEntities  ExtractedEntity[]
 
   @@index([wellId])
   @@index([documentType])
   @@map("documents")
+}
+
+model DocumentChunk {
+  id          String   @id @default(uuid())
+  documentId  String
+  pageNumber  Int
+  chunkIndex  Int
+  text        String
+  section     String?
+  startOffset Int?
+  endOffset   Int?
+  tokenCount  Int?
+  embedding   Json?    // Vector representation
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([pageNumber])
+  @@map("document_chunks")
+}
+
+model HistoricalEventEvidence {
+  id          String   @id @default(uuid())
+  eventId     String
+  documentId  String
+  pageNumber  Int
+  textExcerpt String
+  confidence  Float    @default(1.0)
+  createdAt   DateTime @default(now())
+
+  event    OperationalEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  document Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([documentId])
+  @@map("historical_event_evidence")
+}
+
+model ExtractedEntity {
+  id              String   @id @default(uuid())
+  documentId      String
+  entityType      String   // WELL, DEPTH, FORMATION, DRILLING_PARAM, EVENT, ACTION
+  value           String
+  normalizedValue String?
+  confidence      Float    @default(1.0)
+  pageNumber      Int
+  textSpan        String?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([entityType])
+  @@map("extracted_entities")
 }
 
 model DataSource {
