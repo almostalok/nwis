@@ -7,6 +7,26 @@ import { loadGoogleMaps, PETRO_DARK_MAP_STYLES, GOOGLE_MAP_API_KEY } from '../li
 
 declare const google: any;
 
+const ESRI_TILES: Record<string, { url: string; attribution: string }> = {
+  DARK: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri',
+  },
+  SATELLITE: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS',
+  },
+  TERRAIN: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+  },
+  ROADMAP: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri',
+  },
+};
+
+
 interface WellMapProps {
   initialWells?: Well[];
   filteredWells?: Well[];
@@ -30,6 +50,10 @@ export function WellMap({
   const circleRef = useRef<any>(null);
   const infoWindowRef = useRef<any>(null);
   const centerMarkerRef = useRef<any>(null);
+  const leafletMapRef = useRef<any>(null);
+  const leafletTileLayerRef = useRef<any>(null);
+  const leafletMarkersRef = useRef<any[]>([]);
+  const leafletCircleRef = useRef<any>(null);
 
   // Map state
   const [mapEngine, setMapEngine] = useState<'GOOGLE_MAPS' | 'LEAFLET_FALLBACK'>('GOOGLE_MAPS');
@@ -148,6 +172,26 @@ export function WellMap({
       isCancelled = true;
     };
   }, []);
+
+  
+  // Update Leaflet Tile Layer when mapType changes in fallback mode
+  useEffect(() => {
+    if (mapEngine === 'LEAFLET_FALLBACK' && leafletMapRef.current && leafletTileLayerRef.current) {
+      import('leaflet').then((L) => {
+        const map = leafletMapRef.current;
+        if (!map) return;
+        if (leafletTileLayerRef.current) {
+          map.removeLayer(leafletTileLayerRef.current);
+        }
+        const cfg = ESRI_TILES[mapType] || ESRI_TILES.DARK;
+        const newLayer = L.tileLayer(cfg.url, {
+          attribution: cfg.attribution,
+          maxZoom: 18,
+        }).addTo(map);
+        leafletTileLayerRef.current = newLayer;
+      });
+    }
+  }, [mapType, mapEngine]);
 
   // Update Google Map Type (Dark, Satellite, Terrain, Roadmap)
   useEffect(() => {
@@ -377,7 +421,7 @@ export function WellMap({
     }
   }, [displayWells, mapEngine, selectedWell, enableRadiusFilter, centerLat, centerLng, radiusKm]);
 
-  // Leaflet Fallback initialization
+  // Leaflet Open-Source Fallback initialization (100% Free, no API key required)
   const initLeafletFallback = () => {
     if (typeof window === 'undefined' || !mapContainerRef.current) return;
     import('leaflet').then((L) => {
@@ -390,24 +434,126 @@ export function WellMap({
       }
       if (!mapContainerRef.current) return;
       mapContainerRef.current.innerHTML = '';
-      const map = L.map(mapContainerRef.current).setView([centerLat, centerLng], 11);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap, &copy; CARTO',
+      const map = L.map(mapContainerRef.current, {
+        zoomControl: true,
+        attributionControl: true,
+      }).setView([centerLat, centerLng], 11);
+
+      const cfg = ESRI_TILES[mapType] || ESRI_TILES.DARK;
+      const tileLayer = L.tileLayer(cfg.url, {
+        attribution: cfg.attribution,
+        maxZoom: 18,
       }).addTo(map);
 
-      displayWells.forEach((w) => {
-        const marker = L.marker([w.latitude, w.longitude]).addTo(map);
-        marker.bindPopup(`<b>${w.wellId}</b><br/>${w.name}<br/>Status: ${w.status}`);
+      leafletMapRef.current = map;
+      leafletTileLayerRef.current = tileLayer;
+
+      map.on('click', (e: any) => {
+        setCenterLat(Number(e.latlng.lat.toFixed(4)));
+        setCenterLng(Number(e.latlng.lng.toFixed(4)));
       });
+
+      renderLeafletMarkers(map, L);
     });
   };
+
+  const renderLeafletMarkers = (map: any, L: any) => {
+    // Clear old markers
+    leafletMarkersRef.current.forEach((m) => map.removeLayer(m));
+    leafletMarkersRef.current = [];
+
+    if (leafletCircleRef.current) {
+      map.removeLayer(leafletCircleRef.current);
+      leafletCircleRef.current = null;
+    }
+
+    if (enableRadiusFilter) {
+      const circle = L.circle([centerLat, centerLng], {
+        radius: radiusKm * 1000,
+        color: '#10b981',
+        weight: 1.5,
+        fillColor: '#10b981',
+        fillOpacity: 0.08,
+        dashArray: '4, 4',
+      }).addTo(map);
+      leafletCircleRef.current = circle;
+    }
+
+    displayWells.forEach((w) => {
+      const isSelected = selectedWell?.id === w.id || selectedWell?.wellId === w.wellId;
+      const hasEvents = (w as any).events?.length > 0 || (w as any).eventCount > 0;
+      const isDrilling = w.status === 'DRILLING';
+
+      const pinColor = isDrilling
+        ? '#3b82f6'
+        : hasEvents
+        ? '#ef4444'
+        : w.status === 'COMPLETED'
+        ? '#10b981'
+        : '#8b5cf6';
+
+      const iconHtml = `
+        <div style="transform: translate(-50%, -100%); cursor: pointer;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="${isSelected ? 36 : 28}" height="${isSelected ? 44 : 36}" viewBox="0 0 28 36">
+            <path d="M14 0 C6.268 0 0 6.268 0 14 C0 22.5 14 36 14 36 C14 36 28 22.5 28 14 C28 6.268 21.732 0 14 0 Z" fill="${pinColor}" />
+            <circle cx="14" cy="14" r="10" fill="#ffffff" opacity="0.25"/>
+            <path d="M14 6 L10 20 L18 20 Z" fill="#ffffff"/>
+            <path d="M11 12 L17 12 M10.5 16 L17.5 16" stroke="#ffffff" stroke-width="1"/>
+            ${hasEvents ? '<circle cx="21" cy="6" r="4.5" fill="#dc2626" stroke="#ffffff" stroke-width="1"/><text x="21" y="8" font-size="6" font-weight="bold" fill="#ffffff" text-anchor="middle">!</text>' : ''}
+          </svg>
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        className: 'custom-leaflet-derrick',
+        html: iconHtml,
+        iconSize: [isSelected ? 36 : 28, isSelected ? 44 : 36],
+        iconAnchor: [isSelected ? 18 : 14, isSelected ? 44 : 36],
+      });
+
+      const marker = L.marker([w.latitude, w.longitude], { icon: customIcon }).addTo(map);
+
+      const popupHtml = `
+        <div style="font-family: sans-serif; padding: 4px; min-width: 220px; color: #0f172a;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <strong style="background:#047857; color:#fff; padding:2px 5px; border-radius:3px; font-size:11px;">${w.wellId}</strong>
+            <span style="font-size:10px; font-weight:600; padding:2px 6px; border-radius:3px; background:${w.status === 'DRILLING' ? '#dbeafe; color:#1e40af' : '#d1fae5; color:#065f46'}">${w.status}</span>
+          </div>
+          <div style="font-size:13px; font-weight:bold; margin-bottom:2px;">${w.name}</div>
+          <div style="font-size:11px; color:#64748b; margin-bottom:6px;">Field: ${w.field} &bull; Depth: ${w.totalDepth}m</div>
+          <a href="/wells/${w.wellId}" style="display:block; text-align:center; background:#0f172a; color:#fff; padding:5px 8px; border-radius:4px; text-decoration:none; font-size:11px; font-weight:600;">View Full Dossier &rarr;</a>
+        </div>
+      `;
+
+      marker.bindPopup(popupHtml);
+      marker.on('click', () => {
+        setSelectedWell(w);
+        if (onSelectWell) onSelectWell(w);
+      });
+
+      leafletMarkersRef.current.push(marker);
+    });
+  };
+
+
+
+  // Re-render Leaflet markers when filters or selection change
+  useEffect(() => {
+    if (mapEngine === 'LEAFLET_FALLBACK' && leafletMapRef.current) {
+      import('leaflet').then((L) => {
+        renderLeafletMarkers(leafletMapRef.current, L);
+      });
+    }
+  }, [displayWells, mapEngine, selectedWell, enableRadiusFilter, centerLat, centerLng, radiusKm]);
 
   // Center on well helper
   const handleSelectWellFromList = (well: Well) => {
     setSelectedWell(well);
     if (onSelectWell) onSelectWell(well);
 
-    if (googleMapInstanceRef.current && mapEngine === 'GOOGLE_MAPS') {
+    if (mapEngine === 'LEAFLET_FALLBACK' && leafletMapRef.current) {
+      leafletMapRef.current.setView([well.latitude, well.longitude], 13);
+    } else if (googleMapInstanceRef.current && mapEngine === 'GOOGLE_MAPS') {
       googleMapInstanceRef.current.panTo({ lat: well.latitude, lng: well.longitude });
       googleMapInstanceRef.current.setZoom(13);
 
@@ -423,13 +569,12 @@ export function WellMap({
 
   // Fit bounds to all filtered wells
   const handleFitBounds = () => {
-    if (
-      !googleMapInstanceRef.current ||
-      mapEngine !== 'GOOGLE_MAPS' ||
-      !window.google?.maps ||
-      displayWells.length === 0
-    )
+    if (displayWells.length === 0) return;
+    if (mapEngine === 'LEAFLET_FALLBACK' && leafletMapRef.current) {
+      leafletMapRef.current.fitBounds(displayWells.map((w: any) => [w.latitude, w.longitude]), { padding: [50, 50] });
       return;
+    }
+    if (!googleMapInstanceRef.current || mapEngine !== 'GOOGLE_MAPS' || !window.google?.maps) return;
 
     const bounds = new window.google.maps.LatLngBounds();
     displayWells.forEach((w) => bounds.extend({ lat: w.latitude, lng: w.longitude }));
@@ -445,7 +590,9 @@ export function WellMap({
   const handleCenterDuliajan = () => {
     setCenterLat(27.325);
     setCenterLng(95.312);
-    if (googleMapInstanceRef.current && mapEngine === 'GOOGLE_MAPS') {
+    if (mapEngine === 'LEAFLET_FALLBACK' && leafletMapRef.current) {
+      leafletMapRef.current.setView([27.325, 95.312], 11);
+    } else if (googleMapInstanceRef.current && mapEngine === 'GOOGLE_MAPS') {
       googleMapInstanceRef.current.panTo({ lat: 27.325, lng: 95.312 });
       googleMapInstanceRef.current.setZoom(11);
     }
@@ -460,10 +607,10 @@ export function WellMap({
           <div className="flex items-center space-x-1.5 bg-slate-900 px-2.5 py-1 rounded border border-slate-800">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span className="font-semibold text-white">
-              {mapEngine === 'GOOGLE_MAPS' ? 'Google Maps Enterprise' : 'OpenStreetMap'}
+              {mapEngine === 'GOOGLE_MAPS' ? 'Google Maps Enterprise' : 'Esri OpenGIS'}
             </span>
             <span className="text-[10px] font-mono text-emerald-400">
-              {mapEngine === 'GOOGLE_MAPS' ? 'OIL GIS Live' : 'Fallback'}
+              {mapEngine === 'GOOGLE_MAPS' ? 'OIL GIS Live' : 'Free OpenSource'}
             </span>
           </div>
 
@@ -481,8 +628,7 @@ export function WellMap({
         {/* Right Map Controls: Style Switcher & Radius */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Map Type Switcher */}
-          {mapEngine === 'GOOGLE_MAPS' && (
-            <div className="flex rounded-lg bg-slate-900 p-0.5 border border-slate-800 text-[11px] font-medium">
+          <div className="flex rounded-lg bg-slate-900 p-0.5 border border-slate-800 text-[11px] font-medium">
               {(
                 [
                   { id: 'DARK', label: 'Dark Petro' },
@@ -504,7 +650,6 @@ export function WellMap({
                 </button>
               ))}
             </div>
-          )}
 
           {/* Radius Filter Toggle */}
           <button
@@ -556,9 +701,9 @@ export function WellMap({
       </div>
 
       {engineError && (
-        <div className="bg-amber-950/60 border-b border-amber-800/60 px-4 py-1.5 text-xs text-amber-200 flex items-center justify-between">
-          <span>⚠️ {engineError}</span>
-          <span className="text-[10px] font-mono text-amber-400">Leaflet Active</span>
+        <div className="bg-emerald-950/60 border-b border-emerald-800/60 px-4 py-1.5 text-xs text-emerald-200 flex items-center justify-between">
+          <span>🌿 Google Maps demo key requires billing &mdash; Activated free open-source Esri GIS basemap (No API key needed)</span>
+          <span className="text-[10px] font-mono text-emerald-400 font-semibold">Free Mode Active</span>
         </div>
       )}
 
