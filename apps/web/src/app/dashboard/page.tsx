@@ -436,8 +436,8 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="h-96 rounded-lg overflow-hidden border border-petro-800">
-              <WellMap initialWells={wells} selectedWellId={selectedWellId} />
+            <div className="h-[520px] rounded-lg overflow-hidden border border-petro-800">
+              <WellMap initialWells={wells} selectedWellId={selectedWellId} height="100%" />
             </div>
 
           </div>
