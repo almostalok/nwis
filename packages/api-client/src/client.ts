@@ -201,6 +201,14 @@ export class NwisApiClient {
       this.request<any>('/api/v1/knowledge/process-all', { method: 'POST' }),
     processDocument: (id: string): Promise<any> =>
       this.request<any>(`/api/v1/knowledge/process/${id}`, { method: 'POST' }),
+    verifyEntity: (id: string, options?: { value?: string; confidence?: number; notes?: string }): Promise<any> => {
+      const searchParams = new URLSearchParams();
+      if (options?.value) searchParams.append('value', options.value);
+      if (options?.confidence !== undefined) searchParams.append('confidence', String(options.confidence));
+      if (options?.notes) searchParams.append('notes', options.notes);
+      const qs = searchParams.toString();
+      return this.request<any>(`/api/v1/knowledge/entities/${id}/verify${qs ? `?${qs}` : ''}`, { method: 'POST' });
+    },
   };
 
   // --- Stage 02: Drilling Intelligence & Precedents ---
@@ -229,4 +237,118 @@ export class NwisApiClient {
     compare: (wellA: string, wellB: string): Promise<any> =>
       this.request<any>(`/api/v1/intelligence/compare?wellA=${encodeURIComponent(wellA)}&wellB=${encodeURIComponent(wellB)}`),
   };
+
+  // --- Stage 03: Real-Time Drilling Intelligence & Simulation ---
+  readonly realtime = {
+    getLatestSample: (wellId: string): Promise<any> =>
+      this.request<any>(`/api/v1/realtime/wells/${wellId}/latest`),
+    getHistory: (wellId: string, limit?: number): Promise<any[]> =>
+      this.request<any[]>(`/api/v1/realtime/wells/${wellId}/history${limit ? `?limit=${limit}` : ''}`),
+    getFeatures: (wellId: string): Promise<any[]> =>
+      this.request<any[]>(`/api/v1/realtime/wells/${wellId}/features`),
+    getAnomalies: (wellId: string): Promise<any[]> =>
+      this.request<any[]>(`/api/v1/realtime/wells/${wellId}/anomalies`),
+    getRisks: (wellId: string): Promise<any[]> =>
+      this.request<any[]>(`/api/v1/realtime/wells/${wellId}/risks`),
+    getCurrentWellContext: (wellId: string): Promise<any> =>
+      this.request<any>(`/api/v1/realtime/wells/${wellId}/context`),
+    getSensorHealth: (wellId: string): Promise<any[]> =>
+      this.request<any[]>(`/api/v1/realtime/wells/${wellId}/sensor-health`),
+    startSimulation: (body: {
+      wellId: string;
+      scenario?: string;
+      speedMultiplier?: number;
+      startDepth?: number;
+      endDepth?: number;
+    }): Promise<any> =>
+      this.request<any>('/api/v1/realtime/simulator/start', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    stopSimulation: (wellId: string): Promise<any> =>
+      this.request<any>('/api/v1/realtime/simulator/stop', {
+        method: 'POST',
+        body: JSON.stringify({ wellId }),
+      }),
+    pauseSimulation: (wellId: string): Promise<any> =>
+      this.request<any>('/api/v1/realtime/simulator/pause', {
+        method: 'POST',
+        body: JSON.stringify({ wellId }),
+      }),
+    resumeSimulation: (wellId: string): Promise<any> =>
+      this.request<any>('/api/v1/realtime/simulator/resume', {
+        method: 'POST',
+        body: JSON.stringify({ wellId }),
+      }),
+    runHackathonDemo: (): Promise<any> =>
+      this.request<any>('/api/v1/realtime/simulator/demo', {
+        method: 'POST',
+      }),
+    getSimulatorStatus: (): Promise<any> =>
+      this.request<any>('/api/v1/realtime/simulator/status'),
+    resetSimulation: (): Promise<any> =>
+      this.request<any>('/api/v1/realtime/simulator/reset', {
+        method: 'POST',
+      }),
+  };
+
+  // --- Stage 03: Alert Lifecycle Management ---
+  readonly alerts = {
+    list: (params?: {
+      wellId?: string;
+      riskType?: string;
+      severity?: string;
+      status?: string;
+      limit?: number;
+    }): Promise<any[]> => {
+      const searchParams = new URLSearchParams();
+      if (params?.wellId) searchParams.append('wellId', params.wellId);
+      if (params?.riskType) searchParams.append('riskType', params.riskType);
+      if (params?.severity) searchParams.append('severity', params.severity);
+      if (params?.status) searchParams.append('status', params.status);
+      if (params?.limit) searchParams.append('limit', String(params.limit));
+      const qs = searchParams.toString();
+      return this.request<any[]>(`/api/v1/alerts${qs ? `?${qs}` : ''}`);
+    },
+    getById: (id: string): Promise<any> =>
+      this.request<any>(`/api/v1/alerts/${id}`),
+    acknowledge: (id: string, actor?: string, note?: string): Promise<any> =>
+      this.request<any>(`/api/v1/alerts/${id}/acknowledge`, {
+        method: 'POST',
+        body: JSON.stringify({ actor, note }),
+      }),
+    resolve: (id: string, actor?: string, note?: string): Promise<any> =>
+      this.request<any>(`/api/v1/alerts/${id}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({ actor, note }),
+      }),
+    dismiss: (id: string, reason: string, actor?: string): Promise<any> =>
+      this.request<any>(`/api/v1/alerts/${id}/dismiss`, {
+        method: 'POST',
+        body: JSON.stringify({ reason, actor }),
+      }),
+  };
+
+  // --- Stage 04: Health, Model Registry & Executive Reports ---
+  readonly health = {
+    check: (): Promise<any> => this.request<any>('/health'),
+    live: (): Promise<any> => this.request<any>('/health/live'),
+    ready: (): Promise<any> => this.request<any>('/health/ready'),
+    dependencies: (): Promise<any> => this.request<any>('/health/dependencies'),
+  };
+
+  readonly models = {
+    list: (): Promise<any[]> => this.request<any[]>('/api/v1/models'),
+    getById: (id: string): Promise<any> => this.request<any>(`/api/v1/models/${id}`),
+  };
+
+  readonly reports = {
+    getWellReport: (wellId: string): Promise<any> =>
+      this.request<any>(`/api/v1/reports/well/${wellId}`),
+    getAlertReport: (alertId: string): Promise<any> =>
+      this.request<any>(`/api/v1/reports/alert/${alertId}`),
+    getDailyReport: (): Promise<any> =>
+      this.request<any>('/api/v1/reports/daily'),
+  };
 }
+

@@ -14,3 +14,4 @@ export * from './audit';
 export * from './ingestion';
 export * from './adapters';
 export * from './intelligence';
+export * from './realtime';

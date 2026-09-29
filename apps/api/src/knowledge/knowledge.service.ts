@@ -338,4 +338,37 @@ export class KnowledgeService {
 
     return doc;
   }
+
+  /**
+   * Human-in-the-loop verification of an extracted technical entity
+   */
+  async verifyEntity(entityId: string, update: { value?: string; confidence?: number; verifiedBy?: string; notes?: string }) {
+    const existing = await prisma.extractedEntity.findUnique({
+      where: { id: entityId },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Extracted entity [${entityId}] not found`);
+    }
+
+    const currentMetadata = (existing.metadata as Record<string, any>) || {};
+
+    const updated = await prisma.extractedEntity.update({
+      where: { id: entityId },
+      data: {
+        value: update.value !== undefined ? update.value : existing.value,
+        confidence: update.confidence !== undefined ? update.confidence : 1.0,
+        metadata: {
+          ...currentMetadata,
+          humanVerified: true,
+          verifiedAt: new Date().toISOString(),
+          verifiedBy: update.verifiedBy || 'Drilling Engineer',
+          notes: update.notes || 'Manually verified against original technical document',
+        },
+      },
+    });
+
+    this.logger.log(`Entity [${entityId}] verified by ${update.verifiedBy || 'Drilling Engineer'}`);
+    return updated;
+  }
 }

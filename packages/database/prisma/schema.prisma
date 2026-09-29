@@ -108,6 +108,80 @@ enum AuditAction {
   DOCUMENT_UPLOAD
   EVENT_UPDATE
   USER_UPDATE
+  ALERT_CREATED
+  ALERT_ACKNOWLEDGED
+  ALERT_RESOLVED
+  ALERT_DISMISSED
+  ALERT_ESCALATED
+  SIMULATION_STARTED
+  SIMULATION_STOPPED
+  MANUAL_OVERRIDE
+}
+
+enum SensorQuality {
+  GOOD
+  SUSPECT
+  MISSING
+  STALE
+  OUT_OF_RANGE
+  INVALID
+  DUPLICATE
+}
+
+enum AlertSeverity {
+  NORMAL
+  WATCH
+  WARNING
+  CRITICAL
+}
+
+enum AlertStatus {
+  NEW
+  ACKNOWLEDGED
+  ESCALATED
+  RESOLVED
+  DISMISSED
+}
+
+enum DrillingState {
+  DRILLING
+  SLIDING
+  ROTATING
+  CONNECTION
+  TRIPPING
+  CIRCULATING
+  REAMING
+  CEMENTING
+  STATIC
+  UNKNOWN
+}
+
+enum RiskType {
+  STUCK_PIPE
+  LOST_CIRCULATION
+  KICK
+  PRESSURE_ANOMALY
+  TORQUE_ANOMALY
+  CEMENTING_RISK
+  FORMATION_INSTABILITY
+}
+
+enum SimulationScenario {
+  NORMAL_DRILLING
+  TORQUE_SPIKE
+  ROP_DROP
+  STUCK_PIPE_PRECURSOR
+  LOST_CIRCULATION
+  KICK_PRECURSOR
+  PRESSURE_ANOMALY
+  FORMATION_INSTABILITY
+}
+
+enum SimulationState {
+  RUNNING
+  PAUSED
+  STOPPED
+  COMPLETED
 }
 
 model Well {
@@ -137,6 +211,9 @@ model Well {
   casingSections     CasingSection[]
   cementingJobs      CementingJob[]
   documents          Document[]
+  realtimeSamples    RealtimeDrillingSample[]
+  alerts             Alert[]
+  contextSnapshots   ContextSnapshot[]
 
   @@index([field])
   @@index([status])
@@ -486,3 +563,228 @@ model IngestionJobRecord {
 
   @@map("ingestion_jobs")
 }
+
+model RealtimeDrillingSample {
+  id                 String        @id @default(uuid())
+  wellId             String
+  timestamp          DateTime
+  measuredDepth      Float
+  trueVerticalDepth  Float?
+  formationId        String?
+  rop                Float?
+  wob                Float?
+  rpm                Float?
+  torque             Float?
+  hookload           Float?
+  blockPosition      Float?
+  blockVelocity      Float?
+  standpipePressure  Float?
+  annularPressure    Float?
+  flowIn             Float?
+  flowOut            Float?
+  pumpRate           Float?
+  pitVolume          Float?
+  mudWeightIn        Float?
+  mudWeightOut       Float?
+  mudTemperature     Float?
+  ecd                Float?
+  drag               Float?
+  bitDepth           Float?
+  bitSize            Float?
+  pumpPressure       Float?
+  connectionState    String?
+  rotaryState        String?
+  circulationState   String?
+  drillingState      DrillingState @default(DRILLING)
+  source             String        @default("SYNTHETIC_STREAM")
+  quality            SensorQuality @default(GOOD)
+  qualityIssues      Json?
+  createdAt          DateTime      @default(now())
+
+  well Well @relation(fields: [wellId], references: [wellId], onDelete: Cascade)
+
+  @@index([wellId, timestamp])
+  @@index([wellId, measuredDepth])
+  @@index([formationId, timestamp])
+  @@map("realtime_drilling_samples")
+}
+
+model RealtimeFeature {
+  id                         String   @id @default(uuid())
+  wellId                     String
+  timestamp                  DateTime
+  windowSeconds              Int      // 30, 60, 300, 900
+  torqueMean                 Float?
+  torqueStd                  Float?
+  torqueSlope                Float?
+  torqueZScore               Float?
+  torqueRobustZ              Float?
+  ropMean                    Float?
+  ropSlope                   Float?
+  ropZScore                  Float?
+  dragMean                   Float?
+  dragSlope                  Float?
+  sppMean                    Float?
+  sppSlope                   Float?
+  flowDifference             Float?
+  pitVolumeChange            Float?
+  mudWeightChange            Float?
+  wobNormalized              Float?
+  rpmNormalized              Float?
+  connectionVsDrilling       String?
+  formationBaselineDeviation Json?
+  rawFeatures                Json?
+  createdAt                  DateTime @default(now())
+
+  @@index([wellId, timestamp])
+  @@index([wellId, windowSeconds])
+  @@map("realtime_features")
+}
+
+model AnomalyRecord {
+  id            String        @id @default(uuid())
+  wellId        String
+  timestamp     DateTime
+  depth         Float
+  formation     String?
+  parameter     String        // TORQUE, ROP, DRAG, FLOW_OUT, SPP
+  observedValue Float
+  expectedValue Float
+  deviation     Float         // percentage or normalized diff
+  severity      AlertSeverity
+  method        String        // ROLLING_Z_SCORE, ROBUST_Z, TREND_SLOPE, MULTIVARIATE_RULE
+  confidence    Float
+  evidence      Json?
+  createdAt     DateTime      @default(now())
+
+  @@index([wellId, timestamp])
+  @@index([severity])
+  @@map("anomaly_records")
+}
+
+model RiskAssessment {
+  id                  String        @id @default(uuid())
+  wellId              String
+  riskType            RiskType
+  score               Float         // 0-100 prototype risk score
+  severity            AlertSeverity
+  confidence          Float         // 0.0-1.0 decision support confidence
+  depth               Float
+  formation           String?
+  signals             Json          // Realtime signal array
+  evidence            Json          // Parameter deviations
+  contributingFactors Json          // Factor contribution breakdown (+24 torque, etc)
+  historicalContext   Json?         // Similar wells and matching precedents
+  recommendedReview   String
+  modelVersion        String        @default("v1.0.0-rules")
+  featureVersion      String        @default("v1.0.0")
+  timestamp           DateTime      @default(now())
+
+  @@index([wellId, timestamp])
+  @@index([riskType])
+  @@index([severity])
+  @@map("risk_assessments")
+}
+
+model Alert {
+  id                 String        @id @default(uuid())
+  wellId             String
+  riskType           RiskType
+  severity           AlertSeverity
+  status             AlertStatus   @default(NEW)
+  title              String
+  description        String
+  score              Float
+  confidence         Float
+  detectedAt         DateTime      @default(now())
+  detectedDepth      Float
+  formationId        String?
+  triggerSignals     Json
+  historicalEvidence Json?
+  sourceEvidence     Json?
+  acknowledgedBy     String?
+  acknowledgedAt     DateTime?
+  resolvedBy         String?
+  resolvedAt         DateTime?
+  resolutionNote     String?
+  dismissedBy        String?
+  dismissedAt        DateTime?
+  dismissalReason    String?
+  peakScore          Float         @default(0)
+  lastTriggeredAt    DateTime      @default(now())
+  modelVersion       String        @default("v1.0.0-rules")
+  featureVersion     String        @default("v1.0.0")
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  well   Well         @relation(fields: [wellId], references: [wellId], onDelete: Cascade)
+  events AlertEvent[]
+
+  @@index([wellId, status])
+  @@index([severity])
+  @@index([detectedAt])
+  @@map("alerts")
+}
+
+model AlertEvent {
+  id            String   @id @default(uuid())
+  alertId       String
+  action        String   // CREATED, ESCALATED, ACKNOWLEDGED, RESOLVED, DISMISSED, SCORE_UPDATED
+  actor         String   // SYSTEM, or user email
+  previousState String?
+  newState      String
+  score         Float?
+  reason        String?
+  metadata      Json?
+  timestamp     DateTime @default(now())
+
+  alert Alert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@index([alertId, timestamp])
+  @@map("alert_events")
+}
+
+model ContextSnapshot {
+  id                   String   @id @default(uuid())
+  alertId              String?
+  wellId               String
+  timestamp            DateTime @default(now())
+  depth                Float
+  formation            String?
+  drillingState        String
+  currentParameters    Json
+  recentFeatures       Json
+  activeAnomalies      Json
+  activeRisks          Json
+  similarWells         Json
+  historicalPrecedents Json
+  sourceDocuments      Json
+  modelVersion         String   @default("v1.0.0-rules")
+  configVersion        String   @default("v1.0.0")
+
+  well Well @relation(fields: [wellId], references: [wellId], onDelete: Cascade)
+
+  @@index([wellId, timestamp])
+  @@map("context_snapshots")
+}
+
+model SimulationSession {
+  id              String             @id @default(uuid())
+  wellId          String
+  scenario        SimulationScenario
+  state           SimulationState    @default(RUNNING)
+  startDepth      Float
+  currentDepth    Float
+  endDepth        Float
+  intervalSeconds Int                @default(5)
+  speedMultiplier Float              @default(10.0)
+  stepIndex       Int                @default(0)
+  totalSteps      Int                @default(100)
+  startedAt       DateTime           @default(now())
+  completedAt     DateTime?
+  metadata        Json?
+
+  @@index([wellId, state])
+  @@map("simulation_sessions")
+}
+

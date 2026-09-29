@@ -10,6 +10,10 @@ import { StorageModule } from './storage/storage.module';
 import { WitsmlModule } from './witsml/witsml.module';
 import { KnowledgeModule } from './knowledge/knowledge.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
+import { RealtimeModule } from './realtime/realtime.module';
+import { HealthModule } from './health/health.module';
+import { ModelsModule } from './models/models.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -24,6 +28,11 @@ import { IntelligenceModule } from './intelligence/intelligence.module';
     WitsmlModule,
     KnowledgeModule,
     IntelligenceModule,
+    RealtimeModule,
+    HealthModule,
+    ModelsModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}
+

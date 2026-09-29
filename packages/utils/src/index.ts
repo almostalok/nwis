@@ -4,3 +4,4 @@ export * from './spatial';
 export * from './crypto';
 export * from './vector';
 export * from './nlp';
+export * from './feature-math';

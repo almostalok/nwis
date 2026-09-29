@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: nwis-postgres-prod
+    restart: always
+    environment:
+      POSTGRES_DB: nwis_prod
+      POSTGRES_USER: nwis_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nwis_secure_password_2026}
+    ports:
+      - "5432:5432"
+    volumes:
+      - nwis_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nwis_admin -d nwis_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: nwis-redis-prod
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - nwis_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: nwis-api-prod
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      PORT: 4000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://nwis_admin:${POSTGRES_PASSWORD:-nwis_secure_password_2026}@postgres:5432/nwis_prod?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-oil_nwis_super_secret_production_key_2026}
+      SIMULATION_DEFAULT_WELL_ID: OIL-SYN-020
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health/live"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000
+    container_name: nwis-web-prod
+    restart: always
+    depends_on:
+      - api
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+    ports:
+      - "3000:3000"
+
+volumes:
+  nwis_pgdata:
+  nwis_redisdata:

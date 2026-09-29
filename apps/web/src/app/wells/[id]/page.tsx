@@ -2,7 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+
 import { api } from '../../../lib/api';
+import { LiveMetricCard } from '../../../components/realtime/LiveMetricCard';
+import { LiveParameterChart } from '../../../components/realtime/LiveParameterChart';
+import { RiskScorePanel } from '../../../components/realtime/RiskScorePanel';
+import Link from 'next/link';
 
 export default function WellDetailPage() {
   const params = useParams();
@@ -11,6 +16,9 @@ export default function WellDetailPage() {
   const [well, setWell] = useState<any>(null);
   const [drillingParams, setDrillingParams] = useState<any[]>([]);
   const [mudSamples, setMudSamples] = useState<any[]>([]);
+  const [viewMode, setViewMode] = useState<'LIVE' | 'HISTORICAL'>('HISTORICAL');
+  const [liveContext, setLiveContext] = useState<any>(null);
+  const [liveHistory, setLiveHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'formations' | 'trajectory' | 'parameters' | 'mud' | 'events' | 'casing' | 'documents'
   >('overview');
@@ -28,10 +36,47 @@ export default function WellDetailPage() {
         setWell(wellData);
         setDrillingParams(paramsData);
         setMudSamples(mudData);
+        if (wellData.status === 'DRILLING') {
+          setViewMode('LIVE');
+        }
       })
       .catch((err) => console.error('Failed to load well detail:', err))
       .finally(() => setLoading(false));
+
+    let isMounted = true;
+    const fetchLive = async () => {
+      try {
+        const [context, history] = await Promise.all([
+          api.realtime.getCurrentWellContext(wellId),
+          api.realtime.getHistory(wellId, 40),
+        ]);
+        if (!isMounted) return;
+        setLiveContext(context);
+        if (history && Array.isArray(history)) {
+          setLiveHistory(
+            history.reverse().map((h: any) => ({
+              timestamp: h.timestamp,
+              depth: h.measuredDepth,
+              torque: h.torque,
+              rop: h.rop,
+              drag: h.drag,
+              flowIn: h.flowIn,
+              flowOut: h.flowOut,
+              spp: h.standpipePressure,
+            }))
+          );
+        }
+      } catch (err) {}
+    };
+
+    fetchLive();
+    const interval = setInterval(fetchLive, 2000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [wellId]);
+
 
   if (loading) {
     return (
@@ -67,6 +112,39 @@ export default function WellDetailPage() {
 
   return (
     <div className="space-y-6">
+      {/* Mode Switch: Live Stream vs Historical Dossier */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 bg-petro-950 p-1 rounded-lg border border-petro-800">
+          <button
+            onClick={() => setViewMode('LIVE')}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center space-x-2 transition-colors ${
+              viewMode === 'LIVE'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Live Stream Telemetry</span>
+          </button>
+          <button
+            onClick={() => setViewMode('HISTORICAL')}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+              viewMode === 'HISTORICAL'
+                ? 'bg-petro-800 text-slate-200'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Historical Well Dossier & Logs
+          </button>
+        </div>
+
+        {viewMode === 'LIVE' && (
+          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
+            Real-Time Stream Active &bull; Synthetic Demo
+          </span>
+        )}
+      </div>
+
       {/* Top Dossier Header */}
       <div className="bg-petro-900 border border-petro-800 rounded-xl p-6 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -99,8 +177,14 @@ export default function WellDetailPage() {
 
           <div className="flex items-center space-x-6 text-xs text-slate-300">
             <div>
-              <span className="text-slate-400 block text-[10px] uppercase">Total Depth (MD)</span>
-              <span className="text-lg font-bold font-mono text-emerald-400">{well.totalDepth} m</span>
+              <span className="text-slate-400 block text-[10px] uppercase">
+                {viewMode === 'LIVE' ? 'Current Depth (MD)' : 'Total Depth (MD)'}
+              </span>
+              <span className="text-lg font-bold font-mono text-emerald-400">
+                {viewMode === 'LIVE'
+                  ? `${liveContext?.currentDepth ?? well.totalDepth} m`
+                  : `${well.totalDepth} m`}
+              </span>
             </div>
             <div>
               <span className="text-slate-400 block text-[10px] uppercase">Coordinates</span>
@@ -117,26 +201,108 @@ export default function WellDetailPage() {
           </div>
         </div>
 
-        {/* Tab navigation */}
-        <div className="flex border-b border-petro-800 mt-6 -mb-6 overflow-x-auto space-x-2">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key as any)}
-              className={`py-3 px-3.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === t.key
-                  ? 'border-emerald-500 text-emerald-400 font-semibold'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        {/* Tab navigation (Shown only in Historical mode) */}
+        {viewMode === 'HISTORICAL' && (
+          <div className="flex border-b border-petro-800 mt-6 -mb-6 overflow-x-auto space-x-2">
+            {tabs.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key as any)}
+                className={`py-3 px-3.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === t.key
+                    ? 'border-emerald-500 text-emerald-400 font-semibold'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Tab Panels */}
-      <div className="bg-petro-900 border border-petro-800 rounded-xl p-6 shadow-sm">
+      {/* LIVE VIEW MODE */}
+      {viewMode === 'LIVE' && (
+        <div className="space-y-6">
+          {/* Live Parameter Telemetry Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            <LiveMetricCard
+              label="Torque"
+              value={liveContext?.currentParameters?.torque}
+              unit="kNm"
+              baseline={15.0}
+              deviationPct={liveContext?.recentFeatures?.[0]?.formationBaselineDeviation?.torquePct}
+            />
+            <LiveMetricCard
+              label="ROP"
+              value={liveContext?.currentParameters?.rop}
+              unit="m/hr"
+              baseline={18.0}
+              deviationPct={liveContext?.recentFeatures?.[0]?.formationBaselineDeviation?.ropPct}
+            />
+            <LiveMetricCard
+              label="Overpull Drag"
+              value={liveContext?.currentParameters?.drag}
+              unit="kN"
+              baseline={22.0}
+            />
+            <LiveMetricCard
+              label="Flow In"
+              value={liveContext?.currentParameters?.flowIn}
+              unit="L/min"
+            />
+            <LiveMetricCard
+              label="Flow Out"
+              value={liveContext?.currentParameters?.flowOut}
+              unit="L/min"
+            />
+            <LiveMetricCard
+              label="Standpipe Press."
+              value={liveContext?.currentParameters?.standpipePressure}
+              unit="bar"
+              baseline={195.0}
+            />
+            <LiveMetricCard
+              label="Rotary RPM"
+              value={liveContext?.currentParameters?.rpm}
+              unit="rpm"
+            />
+            <LiveMetricCard
+              label="WOB"
+              value={liveContext?.currentParameters?.wob}
+              unit="kN"
+            />
+            <LiveMetricCard
+              label="Hookload"
+              value={liveContext?.currentParameters?.hookload}
+              unit="kN"
+            />
+            <LiveMetricCard
+              label="Pit Volume"
+              value={liveContext?.currentParameters?.pitVolume}
+              unit="m³"
+            />
+          </div>
+
+          {/* Chart + Risk Panel */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <LiveParameterChart history={liveHistory} selectedWell={well.wellId} />
+            </div>
+            <div>
+              <RiskScorePanel
+                riskAssessment={liveContext?.activeRisks?.[0]}
+                activeAlert={liveContext?.activeAlerts?.[0]}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HISTORICAL VIEW MODE */}
+      {viewMode === 'HISTORICAL' && (
+        <div className="bg-petro-900 border border-petro-800 rounded-xl p-6 shadow-sm">
+
         {/* TAB 1: OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -543,6 +709,8 @@ export default function WellDetailPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
+

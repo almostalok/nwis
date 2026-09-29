@@ -31,4 +31,19 @@ export class KnowledgeController {
   async processDocument(@Param('id') id: string) {
     return this.knowledgeService.processDocument(id);
   }
+
+  @Post('entities/:id/verify')
+  @ApiOperation({ summary: 'Human-in-the-loop verification of an extracted technical entity' })
+  async verifyEntity(
+    @Param('id') id: string,
+    @Query('value') value?: string,
+    @Query('confidence') confidence?: string,
+    @Query('notes') notes?: string,
+  ) {
+    return this.knowledgeService.verifyEntity(id, {
+      value,
+      confidence: confidence ? parseFloat(confidence) : 1.0,
+      notes,
+    });
+  }
 }
