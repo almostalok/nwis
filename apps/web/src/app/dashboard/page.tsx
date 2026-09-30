@@ -7,6 +7,7 @@ import { useToast } from '../../components/Toast';
 
 // Modular Command Center Components
 import { WellContextStrip } from '../../components/command-center/WellContextStrip';
+import { ErmtacLiveDrillingRig } from '../../components/command-center/ErmtacLiveDrillingRig';
 import { PrimaryParameters } from '../../components/command-center/PrimaryParameters';
 import { DecisionSupportHero } from '../../components/command-center/DecisionSupportHero';
 import { HistoricalPrecedents } from '../../components/command-center/HistoricalPrecedents';
@@ -328,7 +329,16 @@ export default function CommandDashboardPage() {
         streamStatus={streamStatus}
       />
 
-      {/* 3. Primary Key Telemetry Signals with Sparklines (Visual Asset #7) */}
+      {/* 3. Live ERMTAC Drilling Rig & Downhole Bit Simulator */}
+      <ErmtacLiveDrillingRig
+        wellId={selectedWellId}
+        sample={latestSample}
+        streamStatus={streamStatus}
+        currentDepth={currentDepth}
+        currentFormation={currentFormation}
+      />
+
+      {/* 4. Primary Key Telemetry Signals with Sparklines (Visual Asset #7) */}
       <PrimaryParameters
         wellId={selectedWellId}
         sample={latestSample}
