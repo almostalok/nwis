@@ -34,57 +34,21 @@ export function LiveMetricCard({
   const isAvailable = value !== null && value !== undefined;
 
   const colorMap = {
-    amber: {
-      accent: '#f59e0b',
-      fill: '#fbbf24',
-      text: 'text-black',
-      dot: 'bg-[#f59e0b]',
-      track: 'bg-[#f59e0b]',
-    },
-    emerald: {
-      accent: '#10b981',
-      fill: '#34d399',
-      text: 'text-black',
-      dot: 'bg-[#10b981]',
-      track: 'bg-[#10b981]',
-    },
-    cyan: {
-      accent: '#06b6d4',
-      fill: '#38bdf8',
-      text: 'text-black',
-      dot: 'bg-[#06b6d4]',
-      track: 'bg-[#06b6d4]',
-    },
-    purple: {
-      accent: '#8b5cf6',
-      fill: '#c084fc',
-      text: 'text-black',
-      dot: 'bg-[#8b5cf6]',
-      track: 'bg-[#8b5cf6]',
-    },
-    blue: {
-      accent: '#3b82f6',
-      fill: '#60a5fa',
-      text: 'text-black',
-      dot: 'bg-[#3b82f6]',
-      track: 'bg-[#3b82f6]',
-    },
-    red: {
-      accent: '#ef4444',
-      fill: '#f87171',
-      text: 'text-black',
-      dot: 'bg-[#ef4444]',
-      track: 'bg-[#ef4444]',
-    },
+    amber: '#f59e0b',
+    emerald: '#10b981',
+    cyan: '#06b6d4',
+    purple: '#8b5cf6',
+    blue: '#3b82f6',
+    red: '#ef4444',
   };
 
-  const activeTheme = isCritical
+  const strokeColor = isCritical
     ? colorMap.red
     : isWarning
     ? colorMap.amber
     : colorMap[accentColor] || colorMap.blue;
 
-  // Mini Sparkline SVG computation
+  // Mini Sparkline computation
   const sparkPoints = history.length > 2
     ? history.slice(-12)
     : isAvailable
@@ -94,72 +58,71 @@ export function LiveMetricCard({
   const minV = Math.min(...sparkPoints);
   const maxV = Math.max(...sparkPoints);
   const diff = maxV - minV || 1;
-  const svgW = 76;
-  const svgH = 26;
+  const svgW = 70;
+  const svgH = 24;
 
   const sparklinePath = sparkPoints
     .map((pt, i) => {
       const x = (i / (sparkPoints.length - 1)) * svgW;
-      const y = svgH - ((pt - minV) / diff) * (svgH - 6) - 3;
+      const y = svgH - ((pt - minV) / diff) * (svgH - 4) - 2;
       return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
     })
     .join(' ');
 
-  const areaPath = `${sparklinePath} L ${svgW} ${svgH} L 0 ${svgH} Z`;
-
-  // Value fill percentage for mini gauge
   const fillPct = isAvailable && maxRange > 0
     ? Math.min(100, Math.max(5, (value / maxRange) * 100))
     : 30;
 
   return (
     <div
-      className={`p-4 rounded-2xl border-2 border-black transition-all font-sans shadow-[3.5px_3.5px_0px_0px_#000000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4.5px_4.5px_0px_0px_#000000] ${
+      className={`p-3.5 rounded-lg border font-sans transition-all relative ${
         isCritical
-          ? 'bg-[#ffe4e6]'
+          ? 'bg-rose-500/5 border-rose-500/30'
           : isWarning
-          ? 'bg-[#fef3c7]'
-          : 'bg-white'
+          ? 'bg-amber-500/5 border-amber-500/30'
+          : 'bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
       }`}
     >
-      {/* Top Header: Label & Unit */}
-      <div className="flex items-center justify-between text-xs font-mono mb-2">
-        <div className="flex items-center space-x-2 truncate">
-          <span className={`w-2.5 h-2.5 rounded-full border border-black ${activeTheme.dot}`} />
-          <span className="font-extrabold text-black tracking-wider uppercase truncate text-[11px]">
+      {/* Top Header: Label & Quality */}
+      <div className="flex items-center justify-between text-xs font-mono mb-1.5">
+        <div className="flex items-center space-x-1.5 truncate">
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ backgroundColor: strokeColor }}
+          />
+          <span className="font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider truncate text-[10px]">
             {label}
           </span>
         </div>
-        <div className="flex items-center space-x-1.5 shrink-0">
+        <div className="flex items-center space-x-1 shrink-0">
           {quality !== 'GOOD' && (
-            <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded bg-[#fef3c7] text-[#92400e] border border-black shadow-[1px_1px_0px_0px_#000]">
+            <span className="px-1 py-0.2 text-[9px] font-mono font-medium rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
               {quality}
             </span>
           )}
-          <span className="text-[10px] text-black font-mono font-bold">[{unit}]</span>
+          <span className="text-[10px] text-zinc-400 font-mono">[{unit}]</span>
         </div>
       </div>
 
       {/* Main Metric Value & Sparkline */}
       <div className="flex items-baseline justify-between mt-1">
-        <div className={`text-2xl font-black font-mono tracking-tight ${activeTheme.text}`}>
+        <div className="text-2xl font-bold font-mono tracking-tight text-zinc-900 dark:text-zinc-50 tabular-nums">
           {isAvailable ? (
             typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(1) : value
           ) : (
-            <span className="text-zinc-400 text-lg font-normal">--</span>
+            <span className="text-zinc-400 text-base font-normal">--</span>
           )}
         </div>
 
         {/* Graphical Mini Sparkline */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5">
           {sparklinePath && (
             <svg width={svgW} height={svgH} className="overflow-visible select-none">
-              <path d={areaPath} fill={activeTheme.fill} opacity={0.3} />
               <path
                 d={sparklinePath}
                 fill="none"
-                stroke="#000000"
-                strokeWidth="2"
+                stroke={strokeColor}
+                strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -167,49 +130,63 @@ export function LiveMetricCard({
                 cx={svgW}
                 cy={
                   svgH -
-                  ((sparkPoints[sparkPoints.length - 1] - minV) / diff) * (svgH - 6) -
-                  3
+                  ((sparkPoints[sparkPoints.length - 1] - minV) / diff) * (svgH - 4) -
+                  2
                 }
-                r="3.5"
-                fill={activeTheme.accent}
-                stroke="#000000"
-                strokeWidth="1.5"
+                r="2"
+                fill={strokeColor}
               />
             </svg>
           )}
 
-          {deviationPct !== undefined && deviationPct !== null && (
+          {trend && (
             <span
-              className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border border-black shadow-[1px_1px_0px_0px_#000] ${
-                deviationPct > 0
-                  ? 'text-[#991b1b] bg-[#fee2e2]'
-                  : deviationPct < 0
-                  ? 'text-[#065f46] bg-[#d1fae5]'
-                  : 'text-black bg-[#f4f4f6]'
+              className={`text-xs font-mono font-bold ${
+                trend === 'up'
+                  ? 'text-amber-500'
+                  : trend === 'down'
+                  ? 'text-blue-500'
+                  : 'text-zinc-400'
               }`}
             >
-              {deviationPct > 0 ? '▲ +' : deviationPct < 0 ? '▼ ' : '• '}
-              {Math.abs(deviationPct)}%
+              {trend === 'up' ? '↗' : trend === 'down' ? '↘' : '→'}
             </span>
           )}
         </div>
       </div>
 
-      {/* Graphical Mini Fill Gauge */}
-      <div className="h-2 bg-[#f4f4f6] rounded-full mt-3 relative overflow-hidden border border-black">
-        <div
-          style={{ width: `${fillPct}%` }}
-          className={`h-full rounded-full transition-all duration-300 border-r border-black ${activeTheme.track}`}
-        />
-      </div>
-
-      {/* Baseline Reference Row */}
-      {baseline !== undefined && baseline !== null && (
-        <div className="mt-2 text-[10px] font-mono font-bold text-zinc-600 flex items-center justify-between pt-1.5 border-t border-black/20">
-          <span>BASELINE:</span>
-          <span className="text-black font-extrabold">{baseline} {unit}</span>
+      {/* Baseline / Deviation Status Subtitle */}
+      {(baseline !== undefined || deviationPct !== undefined) && (
+        <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 mt-2 pt-1.5 border-t border-zinc-100 dark:border-zinc-900">
+          {baseline !== null && baseline !== undefined && (
+            <span>Base: {baseline.toFixed(1)}</span>
+          )}
+          {deviationPct !== null && deviationPct !== undefined && (
+            <span
+              className={`font-semibold ${
+                Math.abs(deviationPct) >= 20
+                  ? 'text-rose-500'
+                  : Math.abs(deviationPct) >= 10
+                  ? 'text-amber-500'
+                  : 'text-emerald-500'
+              }`}
+            >
+              {deviationPct >= 0 ? `+${deviationPct.toFixed(0)}%` : `${deviationPct.toFixed(0)}%`}
+            </span>
+          )}
         </div>
       )}
+
+      {/* Mini Progress Range Bar */}
+      <div className="h-1 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full mt-2 overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-300"
+          style={{
+            width: `${fillPct}%`,
+            backgroundColor: strokeColor,
+          }}
+        />
+      </div>
     </div>
   );
 }

@@ -9,14 +9,14 @@ interface RiskScorePanelProps {
   activeAlert?: any;
 }
 
-export function RiskScorePanel({ riskAssessment, activeAlert }: RiskScorePanelProps) {
+export function RiskScorePanel({ riskAssessment }: RiskScorePanelProps) {
   if (!riskAssessment) {
     return (
-      <div className="bg-white border-2 border-black rounded-2xl p-6 shadow-[3.5px_3.5px_0px_0px_#000000] text-center font-sans">
-        <div className="text-xs font-mono uppercase tracking-wider text-black font-extrabold mb-1">
+      <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm text-center font-sans">
+        <div className="text-xs font-mono uppercase tracking-wider text-zinc-400 font-semibold mb-1">
           Operational Risk Evaluation
         </div>
-        <div className="text-zinc-700 text-xs font-medium">
+        <div className="text-zinc-500 text-xs">
           Status: Nominal &bull; All parameters within baseline bounds.
         </div>
       </div>
@@ -29,91 +29,92 @@ export function RiskScorePanel({ riskAssessment, activeAlert }: RiskScorePanelPr
   const factors = riskAssessment.contributingFactors ?? [];
   const precedents = riskAssessment.historicalContext?.topPrecedentEvents ?? [];
 
-  let badgeClass = 'neo-badge-emerald';
-  let barColor = 'bg-[#10b981]';
+  let badgeClass = 'tech-badge-emerald';
+  let barColor = 'bg-emerald-500';
 
   if (severity === AlertSeverity.CRITICAL) {
-    badgeClass = 'neo-badge-rose';
-    barColor = 'bg-[#ef4444]';
+    badgeClass = 'tech-badge-rose';
+    barColor = 'bg-rose-500';
   } else if (severity === AlertSeverity.WARNING) {
-    badgeClass = 'neo-badge-amber';
-    barColor = 'bg-[#f59e0b]';
+    badgeClass = 'tech-badge-amber';
+    barColor = 'bg-amber-500';
   } else if (severity === AlertSeverity.WATCH) {
-    badgeClass = 'neo-badge-blue';
-    barColor = 'bg-[#3b82f6]';
+    badgeClass = 'tech-badge-blue';
+    barColor = 'bg-blue-500';
   }
 
   const segments = 10;
   const filledSegments = Math.round((score / 100) * segments);
 
   return (
-    <div className="bg-white border-2 border-black rounded-2xl p-5 shadow-[4px_4px_0px_0px_#000000] font-sans">
-      <div className="flex items-center justify-between pb-3 border-b-2 border-black">
+    <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm font-sans space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-900">
         <div>
-          <div className="text-xs font-mono uppercase tracking-wider text-black font-black">
+          <div className="text-xs font-mono uppercase tracking-wider text-zinc-900 dark:text-zinc-100 font-bold">
             {riskType} Risk Evaluation
           </div>
-          <div className="text-[10px] text-zinc-600 font-mono font-bold mt-0.5">
-            DECISION-SUPPORT EVALUATION &bull; NO AUTONOMOUS CONTROL
+          <div className="text-[10px] text-zinc-400 font-mono mt-0.5">
+            DECISION-SUPPORT &bull; NO AUTONOMOUS CONTROL
           </div>
         </div>
-        <span className={`neo-badge text-[11px] uppercase ${badgeClass}`}>
+        <span className={`tech-badge text-[10px] uppercase ${badgeClass}`}>
           {severity}
         </span>
       </div>
 
       {/* Main Score Display */}
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider font-extrabold">
+          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
             Calculated Risk Index
           </div>
-          <div className="text-4xl sm:text-5xl font-black font-mono mt-0.5 text-black">
-            {score} <span className="text-sm text-zinc-500 font-bold">/ 100</span>
+          <div className="text-3xl sm:text-4xl font-bold font-mono mt-0.5 text-zinc-900 dark:text-zinc-50 tracking-tight tabular-nums">
+            {score} <span className="text-xs text-zinc-400 font-normal">/ 100</span>
           </div>
         </div>
 
-        {/* Rounded Segmented Bar */}
+        {/* Segmented Bar */}
         <div className="w-full sm:w-1/2">
-          <div className="flex space-x-1.5 p-1 bg-[#f4f4f6] rounded-xl border-2 border-black">
+          <div className="flex space-x-1 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
             {Array.from({ length: segments }).map((_, i) => (
               <div
                 key={i}
-                className={`h-4 flex-1 rounded-sm border border-black transition-all duration-300 ${
-                  i < filledSegments ? `${barColor} shadow-[1px_1px_0px_0px_#000]` : 'bg-white'
+                className={`h-3 flex-1 rounded-xs transition-all duration-300 ${
+                  i < filledSegments ? barColor : 'bg-zinc-200 dark:bg-zinc-800'
                 }`}
               />
             ))}
           </div>
-          <div className="flex justify-between text-[10px] text-black font-mono font-bold mt-1.5">
-            <span>Nominal (0)</span>
+          <div className="flex justify-between text-[9px] text-zinc-400 font-mono mt-1">
+            <span>Nom (0)</span>
             <span>Watch (30)</span>
-            <span>Warning (60)</span>
-            <span>Critical (80+)</span>
+            <span>Warn (60)</span>
+            <span>Crit (80+)</span>
           </div>
         </div>
       </div>
 
-      {/* Contributing Factors Breakdown */}
+      {/* Contributing Factors */}
       {factors.length > 0 && (
-        <div className="mt-4 pt-3 border-t-2 border-black">
-          <div className="text-[11px] font-mono font-black text-black uppercase tracking-wider mb-2 flex items-center justify-between">
-            <span>Contributing Signal Breakdown</span>
-            <span className="text-zinc-600 text-[10px]">WEIGHTED CALIBRATION</span>
+        <div className="pt-3 border-t border-zinc-100 dark:border-zinc-900 space-y-2">
+          <div className="text-[10px] font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
+            <span>Contributing Signals</span>
+            <span>WEIGHTED</span>
           </div>
 
           <div className="space-y-1.5">
             {factors.map((f: any, idx: number) => (
               <div
                 key={idx}
-                className="flex items-center justify-between text-xs bg-[#f4f4f6] px-3 py-2 rounded-xl border-2 border-black shadow-[1.5px_1.5px_0px_0px_#000]"
+                className="flex items-center justify-between text-xs bg-zinc-50 dark:bg-zinc-900/50 px-2.5 py-1.5 rounded-md border border-zinc-200/60 dark:border-zinc-800/60"
               >
-                <span className="text-black font-mono text-[11px] font-bold">{f.factor}</span>
+                <span className="text-zinc-800 dark:text-zinc-200 font-mono text-[11px] font-medium">{f.factor}</span>
                 <div className="flex items-center space-x-2 font-mono">
-                  <span className="text-[10px] text-zinc-700 truncate max-w-xs hidden sm:inline font-medium">
+                  <span className="text-[10px] text-zinc-400 truncate max-w-xs hidden sm:inline">
                     {f.description}
                   </span>
-                  <span className="text-black font-black text-xs bg-[#fef3c7] px-2 py-0.5 rounded border border-black shadow-[1px_1px_0px_0px_#000]">
+                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
                     +{f.contribution}
                   </span>
                 </div>
@@ -123,27 +124,24 @@ export function RiskScorePanel({ riskAssessment, activeAlert }: RiskScorePanelPr
         </div>
       )}
 
-      {/* Historical Precedent Context Box */}
+      {/* Historical Precedents Box */}
       {precedents.length > 0 && (
-        <div className="mt-4 p-3.5 bg-[#fef3c7] border-2 border-black rounded-xl text-xs shadow-[2px_2px_0px_0px_#000]">
-          <div className="flex items-center space-x-2 font-mono font-black text-black mb-1 text-[11px] tracking-wider uppercase">
-            <span>Institutional Precedents Corroborated</span>
+        <div className="p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs">
+          <div className="text-[10px] font-mono uppercase text-zinc-400 font-semibold mb-1">
+            Corroborated Offset Wells:
           </div>
-          <div className="text-black text-xs leading-relaxed font-medium">
-            Precedent search matched {precedents.length} comparable offset well events (
-            {precedents.map((p: any) => p.wellId || p.wellName).slice(0, 3).join(', ')}).
+          <div className="text-zinc-600 dark:text-zinc-400 text-xs">
+            {precedents.map((p: any) => p.wellId || p.wellName).slice(0, 3).join(', ')}
           </div>
         </div>
       )}
 
       {/* Action Footer */}
-      <div className="mt-4 pt-3 border-t-2 border-black flex items-center justify-between">
-        <span className="text-[11px] font-mono text-zinc-600 font-bold">
-          Model: BAYESIAN-HAZARD-ENSEMBLE
-        </span>
+      <div className="pt-2.5 border-t border-zinc-100 dark:border-zinc-900 flex items-center justify-between text-xs font-mono">
+        <span className="text-[10px] text-zinc-400">BAYESIAN-HAZARD-ENSEMBLE</span>
         <Link
           href="/alerts"
-          className="text-xs font-mono font-bold text-black hover:underline"
+          className="text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white"
         >
           View Alert Details &rarr;
         </Link>

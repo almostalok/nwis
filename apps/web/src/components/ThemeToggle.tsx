@@ -17,10 +17,9 @@ export function ThemeToggle({ compact = false, className = '' }: ThemeToggleProp
   }, []);
 
   if (!mounted) {
-    // Avoid SSR hydration layout shift with a placeholder of matching size
     return (
       <div
-        className={`w-9 h-8 rounded-full border-2 border-black opacity-30 ${className}`}
+        className={`h-8 w-8 rounded-md border border-zinc-200 dark:border-zinc-800 opacity-40 ${className}`}
         aria-hidden="true"
       />
     );
@@ -35,29 +34,21 @@ export function ThemeToggle({ compact = false, className = '' }: ThemeToggleProp
       onClick={toggleTheme}
       aria-label={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
       title={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
-      className={`group relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border-2 border-black bg-white text-black shadow-[2px_2px_0px_0px_#000000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer select-none ${className}`}
+      className={`relative inline-flex items-center justify-center gap-1.5 h-8 px-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-xs font-mono font-medium ${className}`}
     >
       {isDark ? (
         <>
-          <span className="text-sm leading-none transition-transform group-hover:rotate-45 duration-200">
-            ☀️
-          </span>
-          {!compact && (
-            <span className="font-mono text-[11px] font-black tracking-wider uppercase">
-              LIGHT
-            </span>
-          )}
+          <svg className="w-3.5 h-3.5 text-zinc-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          {!compact && <span>Light</span>}
         </>
       ) : (
         <>
-          <span className="text-sm leading-none transition-transform group-hover:-rotate-12 duration-200">
-            🌙
-          </span>
-          {!compact && (
-            <span className="font-mono text-[11px] font-black tracking-wider uppercase">
-              DARK
-            </span>
-          )}
+          <svg className="w-3.5 h-3.5 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+          {!compact && <span>Dark</span>}
         </>
       )}
     </button>

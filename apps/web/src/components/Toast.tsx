@@ -49,47 +49,45 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {/* Toast Notification Container */}
       <div
         aria-live="polite"
-        className="fixed bottom-4 right-4 z-50 flex flex-col space-y-2.5 max-w-md w-full pointer-events-none px-3"
+        className="fixed bottom-4 right-4 z-50 flex flex-col space-y-2 max-w-sm w-full pointer-events-none px-3"
       >
         {toasts.map((toast) => {
           const isError = toast.type === 'error';
           const isSuccess = toast.type === 'success';
           const isWarning = toast.type === 'warning';
 
-          const tag = isError ? 'ERROR' : isSuccess ? 'SUCCESS' : isWarning ? 'WARNING' : 'INFO';
-          const tagBg = isError
-            ? 'bg-[#fee2e2] text-[#991b1b] border-2 border-black'
+          const tag = isError ? 'ERROR' : isSuccess ? 'SUCCESS' : isWarning ? 'WARN' : 'INFO';
+          const badgeClass = isError
+            ? 'tech-badge-rose'
             : isSuccess
-            ? 'bg-[#d1fae5] text-[#065f46] border-2 border-black'
+            ? 'tech-badge-emerald'
             : isWarning
-            ? 'bg-[#fef3c7] text-[#92400e] border-2 border-black'
-            : 'bg-[#dbeafe] text-[#1e3a8a] border-2 border-black';
+            ? 'tech-badge-amber'
+            : 'tech-badge-blue';
 
           return (
             <div
               key={toast.id}
-              className="pointer-events-auto flex items-start space-x-3.5 p-4 bg-white border-2 border-black rounded-2xl shadow-[4px_4px_0px_0px_#000000] transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 font-sans"
+              className="pointer-events-auto flex items-start space-x-3 p-3.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 font-sans"
               role="alert"
             >
-              <span
-                className={`px-2 py-0.5 text-[10px] font-mono font-bold shrink-0 tracking-wider rounded-full shadow-[1px_1px_0px_0px_#000] ${tagBg}`}
-              >
+              <span className={`tech-badge text-[9px] uppercase font-mono shrink-0 ${badgeClass}`}>
                 {tag}
               </span>
               <div className="flex-1 text-xs">
                 {toast.title && (
-                  <p className="font-extrabold text-xs mb-0.5 text-black">
+                  <p className="font-semibold text-xs mb-0.5 text-zinc-900 dark:text-zinc-100">
                     {toast.title}
                   </p>
                 )}
-                <p className="leading-relaxed whitespace-pre-wrap text-xs text-zinc-800 font-medium">{toast.message}</p>
+                <p className="leading-relaxed text-zinc-600 dark:text-zinc-400 text-xs">{toast.message}</p>
               </div>
               <button
                 onClick={() => removeToast(toast.id)}
                 aria-label="Dismiss notification"
-                className="w-6 h-6 rounded-full bg-white border-2 border-black shadow-[1px_1px_0px_0px_#000] hover:bg-zinc-100 flex items-center justify-center text-black font-bold text-xs ml-1 shrink-0 focus:outline-none transition-colors"
+                className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 text-xs ml-1 shrink-0 transition-colors"
               >
-                ✕
+                &times;
               </button>
             </div>
           );

@@ -37,24 +37,24 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-[#f4f4f6] text-black flex flex-col font-sans antialiased selection:bg-black selection:text-white">
+      <body className="min-h-screen bg-zinc-50/70 dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col font-sans antialiased selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
         <ThemeProvider>
           <ToastProvider>
             <Navbar />
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
               {children}
             </main>
-            <footer className="bg-white border-t-2 border-black py-4 px-6 text-center text-xs text-zinc-700">
+            <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 py-4 px-6 text-center text-xs text-zinc-500">
               <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-                <span className="font-extrabold text-black">NWIS Drilling Intelligence</span>
-                <span>&bull;</span>
-                <span className="font-semibold text-black">Oil India Limited (OIL)</span>
-                <span>&bull;</span>
-                <span className="neo-badge neo-badge-amber text-[11px]">
+                <span className="font-bold text-zinc-900 dark:text-zinc-100">NWIS Drilling Intelligence</span>
+                <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
+                <span className="font-medium text-zinc-700 dark:text-zinc-300">Oil India Limited (OIL)</span>
+                <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
+                <span className="tech-badge tech-badge-amber text-[10px]">
                   Demonstration Dataset
                 </span>
-                <span>&bull;</span>
-                <span className="text-zinc-600 font-mono text-[11px]">Zero Autonomous Rig Actuation &bull; Advisory Support Only</span>
+                <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
+                <span className="font-mono text-[11px] text-zinc-400">Zero Autonomous Rig Actuation &bull; Advisory Support Only</span>
               </div>
             </footer>
           </ToastProvider>

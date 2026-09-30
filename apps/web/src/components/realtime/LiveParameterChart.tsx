@@ -25,100 +25,110 @@ export function LiveParameterChart({ history, selectedWell }: LiveParameterChart
 
   let primaryKey: keyof ChartPoint = 'torque';
   let primaryLabel = 'Torque';
-  let primaryColor = '#d97706';
+  let primaryColor = '#f59e0b';
   let primaryUnit = 'kNm';
 
   let secondaryKey: keyof ChartPoint = 'rop';
   let secondaryLabel = 'ROP';
-  let secondaryColor = '#059669';
+  let secondaryColor = '#10b981';
   let secondaryUnit = 'm/hr';
 
   if (overlayMode === 'TORQUE_DRAG') {
     primaryKey = 'torque';
     primaryLabel = 'Torque';
-    primaryColor = '#d97706';
+    primaryColor = '#f59e0b';
     primaryUnit = 'kNm';
 
     secondaryKey = 'drag';
     secondaryLabel = 'Drag';
-    secondaryColor = '#e11d48';
+    secondaryColor = '#ef4444';
     secondaryUnit = 'kN';
   } else if (overlayMode === 'FLOW_BALANCE') {
     primaryKey = 'flowIn';
     primaryLabel = 'Flow In';
-    primaryColor = '#2563eb';
+    primaryColor = '#3b82f6';
     primaryUnit = 'L/min';
 
     secondaryKey = 'flowOut';
     secondaryLabel = 'Flow Out';
-    secondaryColor = '#e11d48';
+    secondaryColor = '#f43f5e';
     secondaryUnit = 'L/min';
   } else if (overlayMode === 'SPP_FLOW') {
     primaryKey = 'spp';
     primaryLabel = 'SPP';
-    primaryColor = '#2563eb';
+    primaryColor = '#3b82f6';
     primaryUnit = 'psi';
 
     secondaryKey = 'flowIn';
     secondaryLabel = 'Flow In';
-    secondaryColor = '#d97706';
+    secondaryColor = '#10b981';
     secondaryUnit = 'L/min';
   }
 
-  const primaryValues = points.map((p) => p[primaryKey] as number).filter((v) => typeof v === 'number' && !isNaN(v));
-  const secondaryValues = points.map((p) => p[secondaryKey] as number).filter((v) => typeof v === 'number' && !isNaN(v));
+  const pVals = points.map((p) => p[primaryKey] as number).filter((v) => typeof v === 'number');
+  const sVals = points.map((p) => p[secondaryKey] as number).filter((v) => typeof v === 'number');
 
-  const pMin = primaryValues.length > 0 ? Math.floor(Math.min(...primaryValues) * 0.9) : 0;
-  const pMax = primaryValues.length > 0 ? Math.ceil(Math.max(...primaryValues) * 1.1) : 100;
+  const pMin = pVals.length > 0 ? Math.floor(Math.min(...pVals) * 0.9) : 0;
+  const pMax = pVals.length > 0 ? Math.ceil(Math.max(...pVals) * 1.1) : 100;
+  const pDiff = pMax - pMin || 1;
 
-  const sMin = secondaryValues.length > 0 ? Math.floor(Math.min(...secondaryValues) * 0.9) : 0;
-  const sMax = secondaryValues.length > 0 ? Math.ceil(Math.max(...secondaryValues) * 1.1) : 100;
+  const sMin = sVals.length > 0 ? Math.floor(Math.min(...sVals) * 0.9) : 0;
+  const sMax = sVals.length > 0 ? Math.ceil(Math.max(...sVals) * 1.1) : 50;
+  const sDiff = sMax - sMin || 1;
 
   const width = 640;
   const height = 180;
-  const padding = { top: 20, right: 45, bottom: 20, left: 45 };
+  const padding = { top: 16, bottom: 24, left: 45, right: 45 };
   const innerWidth = width - padding.left - padding.right;
   const innerHeight = height - padding.top - padding.bottom;
 
-  let primaryPath = '';
-  let secondaryPath = '';
+  const primaryPath = points.length > 1
+    ? points
+        .map((pt, i) => {
+          const val = pt[primaryKey] as number;
+          if (val === null || val === undefined) return null;
+          const x = padding.left + (i / (points.length - 1)) * innerWidth;
+          const y = padding.top + innerHeight - ((val - pMin) / pDiff) * innerHeight;
+          return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+        })
+        .filter(Boolean)
+        .join(' ')
+    : '';
 
-  points.forEach((pt, i) => {
-    const x = padding.left + (i / Math.max(points.length - 1, 1)) * innerWidth;
-
-    const pVal = pt[primaryKey] as number;
-    if (typeof pVal === 'number' && !isNaN(pVal) && pMax > pMin) {
-      const pNorm = (pVal - pMin) / (pMax - pMin);
-      const y1 = padding.top + innerHeight * (1 - pNorm);
-      primaryPath += `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y1.toFixed(1)} `;
-    }
-
-    const sVal = pt[secondaryKey] as number;
-    if (typeof sVal === 'number' && !isNaN(sVal) && sMax > sMin) {
-      const sNorm = (sVal - sMin) / (sMax - sMin);
-      const y2 = padding.top + innerHeight * (1 - sNorm);
-      secondaryPath += `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y2.toFixed(1)} `;
-    }
-  });
+  const secondaryPath = points.length > 1
+    ? points
+        .map((pt, i) => {
+          const val = pt[secondaryKey] as number;
+          if (val === null || val === undefined) return null;
+          const x = padding.left + (i / (points.length - 1)) * innerWidth;
+          const y = padding.top + innerHeight - ((val - sMin) / sDiff) * innerHeight;
+          return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+        })
+        .filter(Boolean)
+        .join(' ')
+    : '';
 
   return (
-    <div className="bg-white border-2 border-black rounded-2xl p-5 shadow-[4px_4px_0px_0px_#000000] font-sans">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b-2 border-black gap-3">
+    <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm font-sans">
+      {/* Header & Modes */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-900">
         <div>
-          <div className="text-xs font-mono uppercase tracking-wider text-black font-black flex items-center space-x-2">
-            <span>Real-Time Parameter Correlation</span>
-            <span className="neo-badge neo-badge-emerald text-[10px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] border border-black animate-pulse" />
-              Live Stream
+          <div className="flex items-center space-x-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
+              Live Real-Time Telemetry Stream
+            </h3>
+            <span className="tech-badge tech-badge-blue text-[9px]">
+              {selectedWell}
             </span>
           </div>
-          <div className="text-xs text-zinc-700 font-mono font-bold mt-1">
-            WELL: <span className="text-black font-extrabold">{selectedWell}</span> &bull; DEPTH: <span className="text-black font-extrabold">{points.length > 0 ? `${points[points.length - 1].depth}m MD` : '---'}</span>
-          </div>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            Synchronized WITSML / eRTMAC time-series with multi-parameter overlay
+          </p>
         </div>
 
-        {/* Overlay Mode Selector */}
-        <div className="flex items-center space-x-1 bg-[#f4f4f6] p-1 rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000] text-xs font-mono">
+        {/* Mode Selector */}
+        <div className="flex items-center space-x-1 bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg text-xs font-mono">
           {[
             { mode: 'TORQUE_ROP', label: 'TORQUE + ROP' },
             { mode: 'TORQUE_DRAG', label: 'TORQUE + DRAG' },
@@ -128,10 +138,10 @@ export function LiveParameterChart({ history, selectedWell }: LiveParameterChart
             <button
               key={item.mode}
               onClick={() => setOverlayMode(item.mode as any)}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+              className={`px-2.5 py-1 rounded-md text-[11px] transition-colors ${
                 overlayMode === item.mode
-                  ? 'bg-black text-white shadow-[1px_1px_0px_0px_#000]'
-                  : 'text-black hover:bg-white'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold shadow-xs'
+                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
             >
               {item.label}
@@ -143,7 +153,7 @@ export function LiveParameterChart({ history, selectedWell }: LiveParameterChart
       {/* SVG Chart Canvas */}
       <div className="relative mt-3">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44 select-none">
-          {/* Background Grid Lines */}
+          {/* Hairline Grid Lines */}
           {[0, 0.25, 0.5, 0.75, 1].map((r, i) => {
             const y = padding.top + innerHeight * r;
             return (
@@ -153,10 +163,10 @@ export function LiveParameterChart({ history, selectedWell }: LiveParameterChart
                 y1={y}
                 x2={width - padding.right}
                 y2={y}
-                stroke="#000000"
-                strokeDasharray="3 3"
+                stroke="currentColor"
+                className="text-zinc-200 dark:text-zinc-800"
+                strokeDasharray="2 2"
                 strokeWidth="1"
-                opacity="0.15"
               />
             );
           })}
@@ -167,7 +177,7 @@ export function LiveParameterChart({ history, selectedWell }: LiveParameterChart
               d={primaryPath}
               fill="none"
               stroke={primaryColor}
-              strokeWidth="3"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
@@ -179,55 +189,55 @@ export function LiveParameterChart({ history, selectedWell }: LiveParameterChart
               d={secondaryPath}
               fill="none"
               stroke={secondaryColor}
-              strokeWidth="3"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           )}
 
           {/* Left Y Axis (Primary) */}
-          <text x={padding.left - 8} y={padding.top + 4} fill={primaryColor} fontSize="11" textAnchor="end" fontFamily="JetBrains Mono, monospace" fontWeight="900">
+          <text x={padding.left - 6} y={padding.top + 4} fill={primaryColor} fontSize="10" textAnchor="end" fontFamily="JetBrains Mono, monospace" fontWeight="600">
             {pMax}
           </text>
-          <text x={padding.left - 8} y={padding.top + innerHeight} fill={primaryColor} fontSize="11" textAnchor="end" fontFamily="JetBrains Mono, monospace" fontWeight="900">
+          <text x={padding.left - 6} y={padding.top + innerHeight} fill={primaryColor} fontSize="10" textAnchor="end" fontFamily="JetBrains Mono, monospace" fontWeight="600">
             {pMin}
           </text>
 
           {/* Right Y Axis (Secondary) */}
-          <text x={width - padding.right + 8} y={padding.top + 4} fill={secondaryColor} fontSize="11" textAnchor="start" fontFamily="JetBrains Mono, monospace" fontWeight="900">
+          <text x={width - padding.right + 6} y={padding.top + 4} fill={secondaryColor} fontSize="10" textAnchor="start" fontFamily="JetBrains Mono, monospace" fontWeight="600">
             {sMax}
           </text>
-          <text x={width - padding.right + 8} y={padding.top + innerHeight} fill={secondaryColor} fontSize="11" textAnchor="start" fontFamily="JetBrains Mono, monospace" fontWeight="900">
+          <text x={width - padding.right + 6} y={padding.top + innerHeight} fill={secondaryColor} fontSize="10" textAnchor="start" fontFamily="JetBrains Mono, monospace" fontWeight="600">
             {sMin}
           </text>
         </svg>
 
         {/* Legend */}
-        <div className="flex items-center justify-between mt-3 pt-3 border-t-2 border-black text-xs font-mono">
-          <div className="flex items-center space-x-5">
-            <div className="flex items-center space-x-2">
-              <span className="w-3 h-3 rounded-full border border-black" style={{ backgroundColor: primaryColor }} />
-              <span className="text-black font-extrabold uppercase">{primaryLabel} [{primaryUnit}]:</span>
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-900 text-xs font-mono">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }} />
+              <span className="text-zinc-600 dark:text-zinc-400 font-medium">{primaryLabel} [{primaryUnit}]:</span>
               {points.length > 0 && (
-                <span className="text-black font-black">
+                <span className="text-zinc-900 dark:text-zinc-100 font-semibold tabular-nums">
                   {points[points.length - 1][primaryKey] ?? '---'}
                 </span>
               )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span className="w-3 h-3 rounded-full border border-black" style={{ backgroundColor: secondaryColor }} />
-              <span className="text-black font-extrabold uppercase">{secondaryLabel} [{secondaryUnit}]:</span>
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: secondaryColor }} />
+              <span className="text-zinc-600 dark:text-zinc-400 font-medium">{secondaryLabel} [{secondaryUnit}]:</span>
               {points.length > 0 && (
-                <span className="text-black font-black">
+                <span className="text-zinc-900 dark:text-zinc-100 font-semibold tabular-nums">
                   {points[points.length - 1][secondaryKey] ?? '---'}
                 </span>
               )}
             </div>
           </div>
 
-          <div className="text-[11px] text-zinc-600 font-mono font-bold">
-            [{points.length} SAMPLES STREAMING]
+          <div className="text-[10px] text-zinc-400 font-mono">
+            {points.length} samples streaming
           </div>
         </div>
       </div>

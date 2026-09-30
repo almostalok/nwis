@@ -113,15 +113,15 @@ export function EvidencePanel() {
   ];
 
   return (
-    <section id="evidence-section" className="bg-white border-2 border-black rounded-2xl p-5 lg:p-6 shadow-[4px_4px_0px_0px_#000000] space-y-5 font-sans" aria-label="Extracted Technical Evidence">
+    <section id="evidence-section" className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm space-y-4 font-sans" aria-label="Extracted Technical Evidence">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b-2 border-black">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 border-b border-zinc-100 dark:border-zinc-900">
         <div>
-          <h2 className="text-xs font-black tracking-wider text-black uppercase font-mono flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b] border border-black" />
+          <h2 className="text-xs font-mono font-bold tracking-wider text-zinc-900 dark:text-zinc-100 uppercase flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             Document Intelligence Evidence (DDR &amp; WCR Records)
           </h2>
-          <p className="text-xs text-zinc-700 mt-0.5 font-medium">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
             Verified technical excerpts with contextual highlighting extracted from canonical OIL drilling dossiers
           </p>
         </div>
@@ -129,161 +129,147 @@ export function EvidencePanel() {
         <Link
           id="btn-open-documents"
           href="/documents"
-          className="neo-btn-white text-xs font-mono font-bold"
+          className="h-7 px-3 text-xs font-mono font-medium rounded-md border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors inline-flex items-center gap-1"
         >
-          <span>Open Document Center</span>
+          <span>Document Center</span>
           <span>&rarr;</span>
         </Link>
       </div>
 
-      {/* Grid of Realistic Document Preview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Grid of Document Dossier Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         {evidenceItems.map((doc) => (
           <div
             key={doc.id}
             onClick={() => setSelectedDoc(doc)}
-            className="group relative bg-white border-2 border-black rounded-2xl p-5 shadow-[3.5px_3.5px_0px_0px_#000000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_0px_#000000] transition-all cursor-pointer flex flex-col justify-between"
+            className="group relative bg-zinc-50/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors cursor-pointer flex flex-col justify-between"
           >
-            {/* Engineering Document Header */}
             <div>
-              <div className="flex items-center justify-between pb-2.5 border-b-2 border-black text-xs font-mono">
-                <span className="font-black text-black tracking-wide text-[11px] uppercase">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-200/60 dark:border-zinc-800/60 text-xs font-mono">
+                <span className="font-semibold text-zinc-700 dark:text-zinc-300 text-[10px] uppercase">
                   Oil India Limited
                 </span>
-                <span className="px-2 py-0.5 bg-[#f4f4f6] text-black rounded-md text-[10px] font-bold border border-black">
+                <span className="px-1.5 py-0.2 bg-white dark:bg-zinc-800 text-zinc-500 rounded text-[9px] border border-zinc-200 dark:border-zinc-700">
                   Page {String(doc.page).padStart(2, '0')}
                 </span>
               </div>
 
               {/* Title & Metadata */}
-              <div className="mt-3">
-                <div className="text-[10px] font-mono text-zinc-600 font-bold uppercase tracking-wider">{doc.type}</div>
-                <div className="text-base font-black text-black font-mono">
+              <div className="mt-2.5">
+                <div className="text-[9px] font-mono text-zinc-400 uppercase tracking-wider">{doc.type}</div>
+                <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 font-mono">
                   {doc.wellId}
                 </div>
-                <div className="text-xs font-mono text-[#d97706] font-black mt-0.5">
+                <div className="text-xs font-mono text-amber-600 dark:text-amber-400 mt-0.5">
                   Depth: {doc.depth.toLocaleString()} m MD
                 </div>
               </div>
 
-              {/* Extracted Evidence Excerpt with Highlights */}
-              <div className="mt-3.5 p-3 bg-[#fef3c7] border-2 border-black rounded-xl text-xs space-y-2 text-black shadow-[1.5px_1.5px_0px_0px_#000]">
-                <div className="text-[10px] uppercase tracking-wider text-black font-mono font-black">
+              {/* Highlighted Evidence */}
+              <div className="mt-3 p-3 bg-white dark:bg-zinc-900 rounded border border-zinc-200 dark:border-zinc-800 text-xs space-y-2">
+                <div className="text-[9px] uppercase tracking-wider text-zinc-400 font-mono font-semibold">
                   Extracted Advisory Evidence:
                 </div>
 
-                <div className="space-y-1.5 font-sans">
+                <div className="space-y-1.5 text-xs">
                   <div>
-                    <span className="text-zinc-600 text-[10px] uppercase font-bold font-mono">Event: </span>
-                    <mark className="bg-[#facc15] text-black px-1.5 py-0.5 rounded border border-black font-bold text-xs">
+                    <span className="text-zinc-400 text-[10px] font-mono">Event: </span>
+                    <span className="tech-badge tech-badge-rose text-[10px]">
                       {doc.highlights.event}
-                    </mark>
+                    </span>
                   </div>
 
                   <div>
-                    <span className="text-zinc-600 text-[10px] uppercase font-bold font-mono">Strata: </span>
-                    <mark className="bg-[#93c5fd] text-black px-1.5 py-0.5 rounded border border-black font-bold text-xs">
+                    <span className="text-zinc-400 text-[10px] font-mono">Strata: </span>
+                    <span className="tech-badge tech-badge-amber text-[10px]">
                       {doc.highlights.formation}
-                    </mark>
+                    </span>
                   </div>
 
-                  <div className="text-xs text-zinc-800 font-medium">
-                    <span className="text-zinc-600 text-[10px] uppercase font-bold font-mono">Signals: </span>
+                  <div className="text-xs text-zinc-600 dark:text-zinc-400 leading-snug">
+                    <span className="text-zinc-400 text-[10px] font-mono block">Precursor:</span>
                     {doc.highlights.conditions}
                   </div>
 
-                  <div className="pt-1.5 border-t border-black/30">
-                    <span className="text-zinc-600 text-[10px] uppercase font-bold font-mono">Action Taken: </span>
-                    <mark className="bg-[#6ee7b7] text-black px-1.5 py-0.5 rounded border border-black font-bold text-xs">
+                  <div className="pt-1.5 border-t border-zinc-100 dark:border-zinc-800">
+                    <span className="text-zinc-400 text-[10px] font-mono block">Documented Action:</span>
+                    <span className="tech-badge tech-badge-emerald text-[10px] mt-0.5 inline-block">
                       {doc.highlights.action}
-                    </mark>
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Footer Provenance */}
-            <div className="mt-3.5 pt-2.5 border-t-2 border-black flex items-center justify-between text-xs font-mono font-bold text-black">
-              <span>OCR: {Math.round(doc.confidence * 100)}%</span>
-              <span className="text-black underline flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                <span>Inspect Record</span>
-                <span>&rarr;</span>
+            {/* Verification Footer */}
+            <div className="mt-3 pt-2.5 border-t border-zinc-200/60 dark:border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+              <span>{(doc.confidence * 100).toFixed(0)}% Confidence</span>
+              <span className="text-zinc-600 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors">
+                Inspect Document &rarr;
               </span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Expanded Modal for Detailed Document Inspection */}
+      {/* Modal Dialog for Full DDR Inspection */}
       {selectedDoc && (
         <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans animate-in fade-in duration-100"
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-100"
+          onClick={() => setSelectedDoc(null)}
         >
-          <div className="bg-white border-2 border-black max-w-2xl w-full p-6 sm:p-7 rounded-3xl shadow-[8px_8px_0px_0px_#000000] space-y-4">
-            <div className="flex items-center justify-between pb-3.5 border-b-2 border-black">
+          <div
+            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
               <div>
-                <span className="neo-badge neo-badge-amber text-[10px] uppercase">
-                  OIL Technical Archive &bull; Canonical DDR
+                <span className="tech-badge tech-badge-blue text-[10px]">
+                  {selectedDoc.type}
                 </span>
-                <h3 className="text-xl font-black text-black mt-1 font-mono">
-                  {selectedDoc.type} — {selectedDoc.wellId}
+                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 mt-1 font-mono">
+                  {selectedDoc.title}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedDoc(null)}
-                className="w-8 h-8 rounded-full bg-black text-white hover:bg-zinc-800 flex items-center justify-center font-bold text-sm border-2 border-black shadow-[1.5px_1.5px_0px_0px_#000]"
-                aria-label="Close dialog"
+                className="h-7 w-7 rounded-md border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-black dark:hover:text-white"
               >
-                ✕
+                &times;
               </button>
             </div>
 
-            {/* Document Attributes */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-[#f4f4f6] p-3.5 rounded-2xl border-2 border-black shadow-[2px_2px_0px_0px_#000] font-mono">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800">
               <div>
-                <span className="text-zinc-600 block text-[10px] uppercase font-bold">Well:</span>
-                <strong className="text-black font-black">{selectedDoc.wellId}</strong>
+                <span className="text-zinc-400 block text-[10px]">Well:</span>
+                <span className="font-bold">{selectedDoc.wellId}</span>
               </div>
               <div>
-                <span className="text-zinc-600 block text-[10px] uppercase font-bold">Depth:</span>
-                <strong className="text-[#b45309] font-black">{selectedDoc.depth}m MD</strong>
+                <span className="text-zinc-400 block text-[10px]">Interval:</span>
+                <span className="font-bold">{selectedDoc.depth}m MD</span>
               </div>
               <div>
-                <span className="text-zinc-600 block text-[10px] uppercase font-bold">Date:</span>
-                <strong className="text-black font-black">{selectedDoc.date}</strong>
+                <span className="text-zinc-400 block text-[10px]">Date:</span>
+                <span>{selectedDoc.date}</span>
               </div>
               <div>
-                <span className="text-zinc-600 block text-[10px] uppercase font-bold">Confidence:</span>
-                <strong className="text-[#065f46] font-black">{(selectedDoc.confidence * 100).toFixed(0)}% OCR</strong>
+                <span className="text-zinc-400 block text-[10px]">Confidence:</span>
+                <span className="text-emerald-600 font-bold">{(selectedDoc.confidence * 100).toFixed(0)}% Match</span>
               </div>
             </div>
 
-            {/* Raw Excerpt with Yellow Highlights */}
-            <div className="space-y-1.5">
-              <div className="text-xs font-black text-black uppercase tracking-wider font-mono">
-                Daily Drilling Log Transcript:
-              </div>
-              <pre className="p-4 bg-[#f4f4f6] rounded-2xl border-2 border-black text-xs text-black whitespace-pre-wrap font-mono leading-relaxed max-h-56 overflow-y-auto shadow-inner">
+            <div>
+              <h4 className="text-xs font-mono uppercase text-zinc-400 font-semibold mb-1">
+                Canonical Report Excerpt:
+              </h4>
+              <pre className="p-3.5 bg-zinc-900 text-zinc-100 rounded-lg text-xs font-mono leading-relaxed whitespace-pre-wrap overflow-x-auto">
                 {selectedDoc.rawExcerpt}
               </pre>
             </div>
 
-            {/* Verified Personnel Sign-off */}
-            <div className="pt-2 border-t-2 border-black flex items-center justify-between text-xs text-black font-mono font-bold">
-              <span>Author: <strong>{selectedDoc.author}</strong></span>
-              <span>Verified: <strong className="text-[#065f46]">{selectedDoc.verifiedBy}</strong></span>
-            </div>
-
-            {/* Action Button */}
-            <div className="pt-2 flex justify-end gap-3">
-              <Link
-                href="/documents"
-                className="neo-btn text-xs font-mono uppercase"
-              >
-                Open in Full Document Center &rarr;
-              </Link>
+            <div className="flex justify-between items-center text-xs text-zinc-500 pt-2 border-t border-zinc-200 dark:border-zinc-800 font-mono">
+              <span>Author: {selectedDoc.author}</span>
+              <span>Verified: {selectedDoc.verifiedBy}</span>
             </div>
           </div>
         </div>

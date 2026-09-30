@@ -1,20 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #f4f4f6;
-  --foreground: #000000;
+  --background: #fafafa;
+  --foreground: #09090b;
   --card: #ffffff;
+  --card-foreground: #09090b;
+  --border: #e4e4e7;
+  --border-strong: #09090b;
+  --muted: #71717a;
+  --muted-foreground: #52525b;
   color-scheme: light;
 }
 
 .dark {
-  --background: #0c0d12;
-  --foreground: #f4f4f5;
-  --card: #161822;
+  --background: #000000;
+  --foreground: #fafafa;
+  --card: #09090b;
+  --card-foreground: #fafafa;
+  --border: #27272a;
+  --border-strong: #fafafa;
+  --muted: #a1a1aa;
+  --muted-foreground: #71717a;
   color-scheme: dark;
 }
 
@@ -27,189 +37,317 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Rounded Neo-Brutalist Scrollbar */
+/* Subtle Technical Grid Background */
+.tech-grid-bg {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
+.dark .tech-grid-bg {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+/* Precision Technical Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #e4e4e7;
-  border-left: 2px solid #000000;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #000000;
-  border-radius: 9999px;
-  border: 2px solid #e4e4e7;
+  background: #d4d4d8;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
 }
 
-/* Rounded Neo-Brutalism Component Utilities */
+/* ========================================================= */
+/* VERCEL + BRUTALISM COMPONENT UTILITIES                    */
+/* ========================================================= */
+
 @layer components {
-  /* Neo-Brutalist Cards */
+  /* Technical Brutalist Card Enclosure */
+  .tech-card,
   .neo-card {
     background-color: #ffffff;
-    border: 2px solid #000000;
-    border-radius: 1rem;
-    box-shadow: 3.5px 3.5px 0px 0px #000000;
-    transition: all 0.15s ease-in-out;
+    border: 1px solid #e4e4e7;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    position: relative;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
+  .dark .tech-card,
+  .dark .neo-card {
+    background-color: #09090b !important;
+    border: 1px solid #27272a !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .tech-card-hover,
+  .neo-card-hover {
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .tech-card-hover:hover,
+  .neo-card-hover:hover {
+    border-color: #a1a1aa;
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+  }
+  .dark .tech-card-hover:hover,
+  .dark .neo-card-hover:hover {
+    border-color: #52525b !important;
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .tech-card-sm,
   .neo-card-sm {
     background-color: #ffffff;
-    border: 2px solid #000000;
-    border-radius: 0.75rem;
-    box-shadow: 2.5px 2.5px 0px 0px #000000;
-    transition: all 0.15s ease-in-out;
+    border: 1px solid #e4e4e7;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  }
+  .dark .tech-card-sm,
+  .dark .neo-card-sm {
+    background-color: #09090b !important;
+    border: 1px solid #27272a !important;
   }
 
-  .neo-card-hover {
-    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1);
+  /* Card Header Divider with Technical Label */
+  .tech-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f4f4f5;
   }
-  .neo-card-hover:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 5.5px 5.5px 0px 0px #000000;
-  }
-  .neo-card-hover:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px 0px #000000;
+  .dark .tech-card-header {
+    border-bottom: 1px solid #18181b;
   }
 
-  /* Neo-Brutalist Buttons */
+  /* Vercel Brutalist Buttons */
+  .tech-btn,
   .neo-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: #000000;
+    background-color: #09090b;
     color: #ffffff;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 0.8125rem;
-    padding: 0.5rem 1rem;
-    border: 2px solid #000000;
-    border-radius: 0.75rem;
-    box-shadow: 3px 3px 0px 0px #000000;
-    transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+    padding: 0.45rem 0.95rem;
+    border-radius: 0.5rem;
+    border: 1px solid #09090b;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
   }
+  .tech-btn:hover,
   .neo-btn:hover {
-    background-color: #18181b;
-    transform: translate(-1.5px, -1.5px);
-    box-shadow: 4.5px 4.5px 0px 0px #000000;
+    background-color: #27272a;
+    border-color: #27272a;
+    transform: translateY(-0.5px);
   }
+  .tech-btn:active,
   .neo-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 0px 0px 0px 0px #000000;
+    transform: translateY(0.5px);
+    box-shadow: none;
   }
 
+  .dark .tech-btn,
+  .dark .neo-btn {
+    background-color: #ffffff !important;
+    color: #09090b !important;
+    border: 1px solid #ffffff !important;
+  }
+  .dark .tech-btn:hover,
+  .dark .neo-btn:hover {
+    background-color: #e4e4e7 !important;
+    border-color: #e4e4e7 !important;
+  }
+
+  /* Secondary Button */
+  .tech-btn-secondary,
   .neo-btn-white {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background-color: #ffffff;
-    color: #000000;
-    font-weight: 700;
+    color: #09090b;
+    font-weight: 600;
     font-size: 0.8125rem;
-    padding: 0.5rem 1rem;
-    border: 2px solid #000000;
-    border-radius: 0.75rem;
-    box-shadow: 3px 3px 0px 0px #000000;
-    transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+    padding: 0.45rem 0.95rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e4e4e7;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
   }
+  .tech-btn-secondary:hover,
   .neo-btn-white:hover {
     background-color: #f4f4f5;
-    transform: translate(-1.5px, -1.5px);
-    box-shadow: 4.5px 4.5px 0px 0px #000000;
+    border-color: #d4d4d8;
   }
-  .neo-btn-white:active {
-    transform: translate(2px, 2px);
-    box-shadow: 0px 0px 0px 0px #000000;
+  .dark .tech-btn-secondary,
+  .dark .neo-btn-white {
+    background-color: #09090b !important;
+    color: #fafafa !important;
+    border: 1px solid #27272a !important;
+  }
+  .dark .tech-btn-secondary:hover,
+  .dark .neo-btn-white:hover {
+    background-color: #18181b !important;
+    border-color: #3f3f46 !important;
   }
 
-  /* Color-Coded Neo Badges (Solid black border + rounded pill + hard shadow) */
+  /* High-Precision Semantic Technical Badges */
+  .tech-badge,
   .neo-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.2rem 0.65rem;
-    border: 2px solid #000000;
-    border-radius: 9999px;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.375rem;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 700;
-    box-shadow: 2px 2px 0px 0px #000000;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0.025em;
+    border: 1px solid transparent;
   }
 
+  /* Blue / Active Telemetry */
+  .tech-badge-blue,
   .neo-badge-blue {
-    background-color: #dbeafe;
-    color: #1e3a8a;
-    border: 2px solid #000000;
-    box-shadow: 2px 2px 0px 0px #000000;
+    background-color: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+    border-color: rgba(37, 99, 235, 0.2);
+  }
+  .dark .tech-badge-blue,
+  .dark .neo-badge-blue {
+    background-color: rgba(59, 130, 246, 0.12) !important;
+    color: #93c5fd !important;
+    border-color: rgba(59, 130, 246, 0.25) !important;
   }
 
+  /* Amber / Geological Precedent Warning */
+  .tech-badge-amber,
   .neo-badge-amber {
-    background-color: #fef3c7;
-    color: #78350f;
-    border: 2px solid #000000;
-    box-shadow: 2px 2px 0px 0px #000000;
+    background-color: rgba(217, 119, 6, 0.08);
+    color: #b45309;
+    border-color: rgba(217, 119, 6, 0.2);
+  }
+  .dark .tech-badge-amber,
+  .dark .neo-badge-amber {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+    color: #fde047 !important;
+    border-color: rgba(245, 158, 11, 0.25) !important;
   }
 
+  /* Rose / Critical Incident Precursor */
+  .tech-badge-rose,
   .neo-badge-rose {
-    background-color: #ffe4e6;
-    color: #881337;
-    border: 2px solid #000000;
-    box-shadow: 2px 2px 0px 0px #000000;
+    background-color: rgba(225, 29, 72, 0.08);
+    color: #be123c;
+    border-color: rgba(225, 29, 72, 0.2);
+  }
+  .dark .tech-badge-rose,
+  .dark .neo-badge-rose {
+    background-color: rgba(244, 63, 94, 0.12) !important;
+    color: #fda4af !important;
+    border-color: rgba(244, 63, 94, 0.25) !important;
   }
 
+  /* Emerald / Nominal Grounded Evidence */
+  .tech-badge-emerald,
   .neo-badge-emerald {
-    background-color: #d1fae5;
-    color: #064e3b;
-    border: 2px solid #000000;
-    box-shadow: 2px 2px 0px 0px #000000;
+    background-color: rgba(5, 150, 105, 0.08);
+    color: #047857;
+    border-color: rgba(5, 150, 105, 0.2);
+  }
+  .dark .tech-badge-emerald,
+  .dark .neo-badge-emerald {
+    background-color: rgba(16, 185, 129, 0.12) !important;
+    color: #6ee7b7 !important;
+    border-color: rgba(16, 185, 129, 0.25) !important;
   }
 
+  /* Purple / AI Reasoning */
+  .tech-badge-purple,
   .neo-badge-purple {
-    background-color: #f3e8ff;
-    color: #581c87;
-    border: 2px solid #000000;
-    box-shadow: 2px 2px 0px 0px #000000;
+    background-color: rgba(124, 58, 237, 0.08);
+    color: #6d28d9;
+    border-color: rgba(124, 58, 237, 0.2);
+  }
+  .dark .tech-badge-purple,
+  .dark .neo-badge-purple {
+    background-color: rgba(139, 92, 246, 0.12) !important;
+    color: #d8b4fe !important;
+    border-color: rgba(139, 92, 246, 0.25) !important;
   }
 
-  /* Form Inputs */
+  /* Precision Technical Input */
+  .tech-input,
   .neo-input {
     background-color: #ffffff;
-    border: 2px solid #000000;
-    border-radius: 0.75rem;
-    padding: 0.55rem 0.85rem;
-    color: #000000;
+    border: 1px solid #e4e4e7;
+    border-radius: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    color: #09090b;
     font-size: 0.8125rem;
-    box-shadow: 2px 2px 0px 0px #000000;
     transition: all 0.15s ease;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
   }
+  .tech-input:focus,
   .neo-input:focus {
     outline: none;
-    box-shadow: 3.5px 3.5px 0px 0px #000000;
-    transform: translate(-1px, -1px);
+    border-color: #09090b;
+    box-shadow: 0 0 0 1px #09090b;
+  }
+  .dark .tech-input,
+  .dark .neo-input {
+    background-color: #09090b !important;
+    border: 1px solid #27272a !important;
+    color: #fafafa !important;
+  }
+  .dark .tech-input:focus,
+  .dark .neo-input:focus {
+    border-color: #fafafa !important;
+    box-shadow: 0 0 0 1px #fafafa !important;
   }
 }
 
 /* ========================================================= */
-/* DARK MODE ROUNDED NEO-BRUTALISM SYSTEM                    */
+/* POLISHED DARK MODE INVERSIONS                             */
 /* ========================================================= */
 
 .dark body {
-  background-color: #0c0d12 !important;
-  color: #f4f4f5 !important;
+  background-color: #000000 !important;
+  color: #fafafa !important;
 }
 
-/* Dark Mode Canvas & Surface Backgrounds */
 .dark .bg-white {
-  background-color: #161822 !important;
+  background-color: #09090b !important;
 }
+
 .dark .bg-\[\#f4f4f6\],
 .dark .bg-\[\#ececf0\],
 .dark .bg-\[\#f8f9fa\],
@@ -217,32 +355,32 @@ body {
 .dark .bg-slate-50,
 .dark .bg-gray-50,
 .dark .bg-zinc-50 {
-  background-color: #0c0d12 !important;
+  background-color: #000000 !important;
 }
+
 .dark .bg-gray-100,
 .dark .bg-zinc-100,
 .dark .bg-slate-100 {
-  background-color: #1a1c27 !important;
+  background-color: #121214 !important;
 }
+
 .dark .bg-gray-200,
 .dark .bg-zinc-200,
 .dark .bg-slate-200 {
-  background-color: #242736 !important;
+  background-color: #18181b !important;
 }
 
-/* Dark Mode Solid Neo-Brutalist Borders */
+/* Clean 1px Precision Borders in Dark Mode */
 .dark .border-black {
-  border-color: #ffffff !important;
+  border-color: #27272a !important;
 }
 .dark .border-zinc-950,
 .dark .border-gray-950 {
-  border-color: #ffffff !important;
+  border-color: #27272a !important;
 }
 .dark .border-zinc-800,
-.dark .border-gray-800,
-.dark .border-zinc-700,
-.dark .border-gray-700 {
-  border-color: #3f3f46 !important;
+.dark .border-gray-800 {
+  border-color: #27272a !important;
 }
 .dark .border-zinc-200,
 .dark .border-zinc-300,
@@ -250,105 +388,14 @@ body {
 .dark .border-gray-300,
 .dark .border-zinc-100,
 .dark .border-gray-100 {
-  border-color: #2a2d3d !important;
+  border-color: #18181b !important;
 }
 
-/* Dark Mode Neo-Brutalist Hard Offset Drop Shadows */
-.dark .shadow-\[4px_4px_0px_0px_\#000\],
-.dark .shadow-\[4px_4px_0px_0px_\#000000\],
-.dark .shadow-\[3\.5px_3\.5px_0px_0px_\#000\],
-.dark .shadow-\[3\.5px_3\.5px_0px_0px_\#000000\],
-.dark .shadow-\[3px_3px_0px_0px_\#000\],
-.dark .shadow-\[3px_3px_0px_0px_\#000000\],
-.dark .shadow-\[0_3px_0px_0px_\#000000\],
-.dark .shadow-neo,
-.dark .shadow-neo-lg {
-  box-shadow: 3.5px 3.5px 0px 0px #ffffff !important;
-}
-
-.dark .shadow-\[2px_2px_0px_0px_\#000\],
-.dark .shadow-\[2px_2px_0px_0px_\#000000\],
-.dark .shadow-\[2\.5px_2\.5px_0px_0px_\#000\],
-.dark .shadow-\[2\.5px_2\.5px_0px_0px_\#000000\],
-.dark .shadow-\[1\.5px_1\.5px_0px_0px_\#000\],
-.dark .shadow-\[1px_1px_0px_0px_\#000\],
-.dark .shadow-neo-sm {
-  box-shadow: 2px 2px 0px 0px #ffffff !important;
-}
-
-.dark .shadow-\[5px_5px_0px_0px_\#000\],
-.dark .shadow-\[5px_5px_0px_0px_\#000000\],
-.dark .shadow-\[6px_6px_0px_0px_\#000\],
-.dark .shadow-\[7px_7px_0px_0px_\#000\],
-.dark .shadow-neo-xl {
-  box-shadow: 5px 5px 0px 0px #ffffff !important;
-}
-
-/* Dark Mode Neo Cards */
-.dark .neo-card {
-  background-color: #161822 !important;
-  border-color: #ffffff !important;
-  box-shadow: 3.5px 3.5px 0px 0px #ffffff !important;
-}
-.dark .neo-card-sm {
-  background-color: #161822 !important;
-  border-color: #ffffff !important;
-  box-shadow: 2.5px 2.5px 0px 0px #ffffff !important;
-}
-.dark .neo-card-hover:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 5.5px 5.5px 0px 0px #ffffff !important;
-}
-.dark .neo-card-hover:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px 0px #ffffff !important;
-}
-
-/* Dark Mode Neo Buttons */
-.dark .neo-btn {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  border-color: #ffffff !important;
-  box-shadow: 3px 3px 0px 0px #a1a1aa !important;
-}
-.dark .neo-btn:hover {
-  background-color: #e4e4e7 !important;
-  box-shadow: 4.5px 4.5px 0px 0px #a1a1aa !important;
-}
-.dark .neo-btn:active {
-  box-shadow: 0px 0px 0px 0px #a1a1aa !important;
-}
-
-.dark .neo-btn-white {
-  background-color: #1f2230 !important;
-  color: #ffffff !important;
-  border-color: #ffffff !important;
-  box-shadow: 3px 3px 0px 0px #ffffff !important;
-}
-.dark .neo-btn-white:hover {
-  background-color: #282b3d !important;
-  box-shadow: 4.5px 4.5px 0px 0px #ffffff !important;
-}
-
-/* Dark Mode Primary Button Class */
-.dark button.bg-black,
-.dark a.bg-black {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  border-color: #ffffff !important;
-  box-shadow: 2.5px 2.5px 0px 0px #a1a1aa !important;
-}
-.dark button.bg-black:hover,
-.dark a.bg-black:hover {
-  background-color: #e4e4e7 !important;
-  color: #000000 !important;
-}
-
-/* Dark Mode High-Contrast Typography */
+/* Refined Dark Mode Typography */
 .dark .text-black,
 .dark .text-zinc-950,
 .dark .text-gray-950 {
-  color: #ffffff !important;
+  color: #fafafa !important;
 }
 .dark .text-zinc-900,
 .dark .text-gray-900,
@@ -363,146 +410,50 @@ body {
 .dark .text-zinc-700,
 .dark .text-gray-700,
 .dark .text-slate-700 {
-  color: #d4d4d8 !important;
+  color: #a1a1aa !important;
 }
 .dark .text-zinc-600,
 .dark .text-gray-600,
 .dark .text-slate-600 {
-  color: #a1a1aa !important;
+  color: #71717a !important;
 }
 .dark .text-zinc-500,
 .dark .text-gray-500,
 .dark .text-slate-500 {
-  color: #828799 !important;
-}
-.dark .text-zinc-400,
-.dark .text-gray-400 {
-  color: #9ca3af !important;
+  color: #52525b !important;
 }
 
-/* Dark Mode Color Coded Badges & Telemetry Accents */
-.dark .neo-badge-blue,
-.dark .bg-blue-100,
-.dark .bg-blue-50,
-.dark .bg-\[\#dbeafe\] {
-  background-color: #102a4c !important;
-  color: #93c5fd !important;
-  border-color: #60a5fa !important;
-  box-shadow: 2px 2px 0px 0px #3b82f6 !important;
+/* ========================================================= */
+/* GLOBAL REFINEMENT FOR VERCEL + BRUTALISM HARMONY           */
+/* ========================================================= */
+
+/* Soften overly thick neo-brutalist 2px borders to crisp 1px precision */
+[class*="border-2"][class*="border-black"] {
+  border-width: 1px;
+  border-color: #e4e4e7;
 }
-.dark .text-blue-900,
-.dark .text-blue-950,
-.dark .text-blue-800,
-.dark .text-\[\#1e3a8a\] {
-  color: #93c5fd !important;
+.dark [class*="border-2"][class*="border-black"] {
+  border-color: #27272a;
 }
 
-.dark .neo-badge-amber,
-.dark .bg-amber-100,
-.dark .bg-amber-50,
-.dark .bg-yellow-100,
-.dark .bg-yellow-50,
-.dark .bg-\[\#fef3c7\],
-.dark .bg-\[\#fef08a\],
-.dark .bg-\[\#fbbf24\] {
-  background-color: #452205 !important;
-  color: #fde047 !important;
-  border-color: #fbbf24 !important;
-  box-shadow: 2px 2px 0px 0px #d97706 !important;
+/* Neutralize harsh clunky offset black shadows across existing pages */
+[class*="shadow-["][class*="#000"] {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
 }
-.dark .text-amber-900,
-.dark .text-amber-950,
-.dark .text-amber-800,
-.dark .text-yellow-900,
-.dark .text-\[\#78350f\] {
-  color: #fde047 !important;
+.dark [class*="shadow-["][class*="#000"] {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
 }
 
-.dark .neo-badge-rose,
-.dark .bg-rose-100,
-.dark .bg-rose-50,
-.dark .bg-red-100,
-.dark .bg-red-50,
-.dark .bg-\[\#ffe4e6\],
-.dark .bg-\[\#fecdd3\] {
-  background-color: #4c0519 !important;
-  color: #fda4af !important;
-  border-color: #f43f5e !important;
-  box-shadow: 2px 2px 0px 0px #e11d48 !important;
-}
-.dark .text-rose-900,
-.dark .text-rose-950,
-.dark .text-rose-800,
-.dark .text-red-900,
-.dark .text-\[\#881337\] {
-  color: #fda4af !important;
+/* Tame cartoonish yellow pastel banners if present on subpages */
+.dark .bg-\[\#FFE600\],
+.dark .bg-\[\#FFDE59\] {
+  background-color: #18181b !important;
+  color: #fbbf24 !important;
+  border-color: #27272a !important;
 }
 
-.dark .neo-badge-emerald,
-.dark .bg-emerald-100,
-.dark .bg-emerald-50,
-.dark .bg-green-100,
-.dark .bg-green-50,
-.dark .bg-\[\#d1fae5\] {
-  background-color: #033126 !important;
-  color: #6ee7b7 !important;
-  border-color: #34d399 !important;
-  box-shadow: 2px 2px 0px 0px #059669 !important;
-}
-.dark .text-emerald-900,
-.dark .text-emerald-950,
-.dark .text-emerald-800,
-.dark .text-green-900,
-.dark .text-\[\#064e3b\] {
-  color: #6ee7b7 !important;
+/* High density typography and table metrics */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
-.dark .neo-badge-purple,
-.dark .bg-purple-100,
-.dark .bg-purple-50,
-.dark .bg-\[\#f3e8ff\],
-.dark .bg-\[\#ede9fe\] {
-  background-color: #351252 !important;
-  color: #d8b4fe !important;
-  border-color: #c084fc !important;
-  box-shadow: 2px 2px 0px 0px #9333ea !important;
-}
-.dark .text-purple-900,
-.dark .text-purple-950,
-.dark .text-purple-800,
-.dark .text-\[\#581c87\],
-.dark .text-\[\#5b21b6\] {
-  color: #d8b4fe !important;
-}
-
-/* Form Inputs in Dark Mode */
-.dark .neo-input,
-.dark input[type="text"],
-.dark input[type="search"],
-.dark input[type="number"],
-.dark input[type="password"],
-.dark input[type="email"],
-.dark select,
-.dark textarea {
-  background-color: #161822 !important;
-  color: #ffffff !important;
-  border-color: #ffffff !important;
-  box-shadow: 2px 2px 0px 0px #ffffff !important;
-}
-.dark input::placeholder,
-.dark textarea::placeholder {
-  color: #71717a !important;
-}
-
-/* Scrollbars in Dark Mode */
-.dark ::-webkit-scrollbar-track {
-  background: #111218;
-  border-left: 2px solid #ffffff;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #ffffff;
-  border: 2px solid #111218;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #d4d4d8;
-}

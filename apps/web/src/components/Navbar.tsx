@@ -95,57 +95,59 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white border-b-2 border-black shadow-[0_3px_0px_0px_#000000]">
-        {/* Top Safety & Positioning Message */}
-        <div className="bg-[#fef3c7] border-b-2 border-black px-4 py-1.5 text-xs text-black font-mono flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b] border border-black animate-pulse" />
-            <span className="font-extrabold tracking-wider uppercase text-[10px] bg-[#fbbf24] text-black px-2 py-0.5 rounded-full border border-black shadow-[1px_1px_0px_0px_#000]">
-              SYNTHETIC DEMO DATA
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
+        {/* Top Safety & Status Utility Strip */}
+        <div className="h-7 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-950 px-4 sm:px-6 lg:px-8 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
+          <div className="flex items-center space-x-2.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
             </span>
-            <span className="text-zinc-800 hidden md:inline text-[11px] font-medium">
+            <span className="font-bold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider text-[10px]">
+              DEMO DATASET
+            </span>
+            <span className="text-zinc-300 dark:text-zinc-700">|</span>
+            <span className="hidden sm:inline text-zinc-600 dark:text-zinc-400">
               Assam-Arakan Basin &bull; Oil India Limited
             </span>
           </div>
 
           <div className="flex items-center space-x-3 text-[11px]">
-            <span className="text-zinc-700 hidden sm:inline font-sans">
-              Decision-Support Advisory Only &bull; Zero Autonomous Rig Control
+            <span className="text-zinc-500 hidden md:inline">
+              Advisory Support &bull; Zero Autonomous Rig Control
             </span>
-            <span className="text-[#064e3b] font-bold bg-[#d1fae5] px-2.5 py-0.5 rounded-full border border-black shadow-[1.5px_1.5px_0px_0px_#000] flex items-center gap-1.5 font-mono text-[10px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-ping" />
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold text-[10px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               TARGET: OIL-SYN-020
-            </span>
+            </div>
           </div>
         </div>
 
-        {/* Primary Navbar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Primary Navbar Bar */}
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
-            {/* Left: Brand */}
+            {/* Left: Brand / Title */}
             <div className="flex items-center space-x-3">
               <Link href="/dashboard" className="flex items-center space-x-2.5 group">
-                <div className="px-2.5 py-1 bg-black text-white font-mono font-black text-xs tracking-wider rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000000] group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:shadow-[3px_3px_0px_0px_#000000] transition-all">
+                <div className="px-2 py-0.5 bg-black dark:bg-white text-white dark:text-black font-mono font-bold text-xs tracking-wider rounded transition-transform group-hover:scale-105">
                   OIL
                 </div>
-                <div>
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-base font-black tracking-tight text-black leading-none">
-                      NWIS
-                    </span>
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 bg-[#f4f4f6] text-black rounded-md border border-black">
-                      v1.4
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-zinc-600 block leading-none mt-1 font-semibold">
-                    Drilling Intelligence Command Center
+                <div className="flex items-baseline space-x-2">
+                  <span className="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    NWIS
+                  </span>
+                  <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded border border-zinc-200 dark:border-zinc-700">
+                    v1.4
+                  </span>
+                  <span className="hidden lg:inline text-xs text-zinc-500 dark:text-zinc-400 font-normal">
+                    Command Center
                   </span>
                 </div>
               </Link>
             </div>
 
             {/* Center: Primary Navigation Links (Desktop) */}
-            <nav className="hidden lg:flex items-center bg-[#f4f4f6] p-1 rounded-full border-2 border-black shadow-[2px_2px_0px_0px_#000] space-x-1">
+            <nav className="hidden md:flex items-center space-x-1">
               {primaryNavItems.map((item) => {
                 const isActive =
                   item.href === '/dashboard'
@@ -156,10 +158,10 @@ export function Navbar() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`px-3.5 py-1.5 text-xs font-bold rounded-full transition-all ${
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                       isActive
-                        ? 'bg-black text-white border-2 border-black shadow-[1.5px_1.5px_0px_0px_#000]'
-                        : 'text-zinc-800 hover:text-black hover:bg-white'
+                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900'
                     }`}
                   >
                     {item.label}
@@ -172,21 +174,23 @@ export function Navbar() {
                 <button
                   id="btn-operations-menu"
                   onClick={() => setOperationsOpen(!operationsOpen)}
-                  className={`px-3.5 py-1.5 text-xs font-bold rounded-full transition-all flex items-center gap-1 ${
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1 ${
                     isOperationsActive
-                      ? 'bg-blue-600 text-white border-2 border-black shadow-[1.5px_1.5px_0px_0px_#000]'
-                      : 'text-zinc-800 hover:text-black hover:bg-white'
+                      ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900'
                   }`}
                   aria-expanded={operationsOpen}
                 >
                   <span>Operations</span>
-                  <span className="text-[10px]">&darr;</span>
+                  <svg className="w-3 h-3 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
 
                 {operationsOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white border-2 border-black shadow-[4px_4px_0px_0px_#000000] rounded-2xl p-2 z-50 animate-in fade-in duration-100">
-                    <div className="px-3 py-1.5 text-[10px] font-black text-zinc-500 uppercase tracking-wider border-b-2 border-black mb-1 font-mono">
-                      Platform Operations
+                  <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl rounded-lg p-1.5 z-50 animate-in fade-in duration-100">
+                    <div className="px-2.5 py-1 text-[10px] font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+                      Platform Modules
                     </div>
                     {operationsItems.map((sub) => {
                       const isSubActive =
@@ -198,14 +202,14 @@ export function Navbar() {
                           key={sub.href}
                           href={sub.href}
                           onClick={() => setOperationsOpen(false)}
-                          className={`block px-3 py-2 rounded-xl text-xs transition-all ${
+                          className={`block px-2.5 py-1.5 rounded-md text-xs transition-colors ${
                             isSubActive
-                              ? 'bg-black text-white font-bold'
-                              : 'text-black hover:bg-[#f4f4f6] font-semibold'
+                              ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold'
+                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/60'
                           }`}
                         >
-                          <div className="font-bold">{sub.label}</div>
-                          <div className={`text-[11px] font-normal leading-snug mt-0.5 ${isSubActive ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                          <div className="font-medium">{sub.label}</div>
+                          <div className="text-[11px] text-zinc-500 leading-snug">
                             {sub.desc}
                           </div>
                         </Link>
@@ -223,14 +227,14 @@ export function Navbar() {
               <button
                 id="btn-global-search"
                 onClick={() => setSearchOpen(true)}
-                className="flex items-center space-x-2 px-3 py-1.5 text-xs bg-white text-black font-bold rounded-full border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                className="flex items-center space-x-2 h-8 px-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/80 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors text-xs"
                 title="Search wells, events, documents (Ctrl+K)"
               >
-                <svg className="w-3.5 h-3.5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <span className="hidden sm:inline font-bold">Search</span>
-                <kbd className="hidden sm:inline text-[10px] bg-[#f4f4f6] px-1.5 py-0.5 rounded text-black border border-black font-mono font-bold">
+                <span className="hidden sm:inline font-normal">Search</span>
+                <kbd className="hidden sm:inline text-[10px] bg-white dark:bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-500 border border-zinc-200 dark:border-zinc-700 font-mono font-medium">
                   ⌘K
                 </kbd>
               </button>
@@ -238,14 +242,14 @@ export function Navbar() {
               {currentUser ? (
                 <div className="flex items-center space-x-2">
                   <div className="text-right hidden sm:block">
-                    <div className="text-xs font-bold text-black">{currentUser.name}</div>
-                    <div className="text-[10px] text-blue-700 font-mono font-bold tracking-tight">
+                    <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{currentUser.name}</div>
+                    <div className="text-[10px] text-zinc-500 font-mono">
                       {currentUser.role}
                     </div>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="px-3 py-1.5 text-xs font-bold bg-white text-black rounded-full border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                    className="h-8 px-2.5 text-xs font-medium rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                   >
                     Logout
                   </button>
@@ -253,7 +257,7 @@ export function Navbar() {
               ) : (
                 <button
                   onClick={() => handleQuickLogin('engineer@nwis.oil.in')}
-                  className="px-3.5 py-1.5 text-xs font-bold bg-black text-white rounded-full border-2 border-black shadow-[2px_2px_0px_0px_#000000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                  className="h-8 px-3 text-xs font-medium bg-black dark:bg-white text-white dark:text-black rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
                 >
                   Demo Login
                 </button>
@@ -263,14 +267,14 @@ export function Navbar() {
               <button
                 id="btn-mobile-nav"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-1.5 bg-white text-black border-2 border-black rounded-xl shadow-[2px_2px_0px_0px_#000000]"
+                className="md:hidden p-1.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-md"
                 aria-label="Toggle Mobile Navigation"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   {mobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   )}
                 </svg>
               </button>
@@ -279,8 +283,8 @@ export function Navbar() {
 
           {/* Mobile Drawer Navigation */}
           {mobileMenuOpen && (
-            <div className="lg:hidden py-4 border-t-2 border-black space-y-2">
-              <div className="grid grid-cols-2 gap-2">
+            <div className="md:hidden py-3 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {primaryNavItems.map((item) => {
                   const isActive =
                     item.href === '/dashboard'
@@ -291,10 +295,10 @@ export function Navbar() {
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold border-2 border-black ${
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium ${
                         isActive
-                          ? 'bg-black text-white shadow-[2px_2px_0px_0px_#000]'
-                          : 'bg-white text-black hover:bg-[#f4f4f6]'
+                          ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold'
+                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900'
                       }`}
                     >
                       {item.label}
@@ -303,29 +307,22 @@ export function Navbar() {
                 })}
               </div>
 
-              <div className="pt-2 border-t border-zinc-200">
-                <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase px-1 block mb-1">
+              <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                <span className="text-[10px] font-mono font-medium text-zinc-400 uppercase px-1 block mb-1">
                   Operations & Settings
                 </span>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-1.5">
                   {operationsItems.map((sub) => (
                     <Link
                       key={sub.href}
                       href={sub.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="px-3 py-1.5 bg-[#f4f4f6] text-black border border-black rounded-lg text-xs font-semibold"
+                      className="px-2.5 py-1 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 rounded"
                     >
                       {sub.label}
                     </Link>
                   ))}
                 </div>
-              </div>
-
-              <div className="pt-2 border-t border-zinc-200 flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase px-1">
-                  Theme Appearance
-                </span>
-                <ThemeToggle />
               </div>
             </div>
           )}
