@@ -1,18 +1,21 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { api } from '../../lib/api';
 import { Well, SimulationScenario } from '@nwis/types';
-import Link from 'next/link';
+import { useToast } from '../../components/Toast';
 
 export default function SimulationControlPage() {
+  const toast = useToast();
   const [wells, setWells] = useState<Well[]>([]);
   const [selectedWell, setSelectedWell] = useState<string>('OIL-SYN-020');
   const [scenario, setScenario] = useState<SimulationScenario>(SimulationScenario.STUCK_PIPE_PRECURSOR);
-  const [speedMultiplier, setSpeedMultiplier] = useState<number>(10);
+  const [speedMultiplier, setSpeedMultiplier] = useState<number>(2);
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [logMessages, setLogMessages] = useState<string[]>([]);
+  const [activeStep, setActiveStep] = useState<number>(1);
 
   const addLog = (msg: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -44,9 +47,12 @@ export default function SimulationControlPage() {
         startDepth: 3200,
         endDepth: 3250,
       });
-      addLog(`Started simulation on ${selectedWell} (${scenario}) at ${speedMultiplier}x speed`);
+      const msg = `Started simulation on ${selectedWell} (${scenario}) at ${speedMultiplier}x speed`;
+      addLog(msg);
+      toast.success(msg, 'Simulation Active');
+      setActiveStep(2);
     } catch (err: any) {
-      alert(`Start failed: ${err.message}`);
+      toast.error(`Start failed: ${err.message}`, 'Simulation Error');
     } finally {
       setLoading(false);
     }
@@ -55,230 +61,280 @@ export default function SimulationControlPage() {
   const handleStop = async () => {
     try {
       await api.realtime.stopSimulation(selectedWell);
-      addLog(`Stopped simulation on ${selectedWell}`);
+      const msg = `Stopped simulation on ${selectedWell}`;
+      addLog(msg);
+      toast.info(msg, 'Simulation Stopped');
+      setActiveStep(1);
     } catch (err: any) {
-      alert(`Stop failed: ${err.message}`);
+      toast.error(`Stop failed: ${err.message}`, 'Simulation Error');
     }
   };
 
   const handlePause = async () => {
     try {
       await api.realtime.pauseSimulation(selectedWell);
-      addLog(`Paused simulation on ${selectedWell}`);
+      const msg = `Paused simulation on ${selectedWell}`;
+      addLog(msg);
+      toast.info(msg, 'Simulation Paused');
     } catch (err: any) {
-      alert(`Pause failed: ${err.message}`);
+      toast.error(`Pause failed: ${err.message}`, 'Simulation Error');
     }
   };
 
   const handleResume = async () => {
     try {
       await api.realtime.resumeSimulation(selectedWell);
-      addLog(`Resumed simulation on ${selectedWell}`);
+      const msg = `Resumed simulation on ${selectedWell}`;
+      addLog(msg);
+      toast.success(msg, 'Simulation Resumed');
     } catch (err: any) {
-      alert(`Resume failed: ${err.message}`);
+      toast.error(`Resume failed: ${err.message}`, 'Simulation Error');
     }
   };
 
-  const handleRunDemo = async () => {
+  const handleReset = async () => {
     try {
-      setLoading(true);
-      const res = await api.realtime.runHackathonDemo();
-      setSelectedWell('OIL-SYN-020');
-      setScenario(SimulationScenario.STUCK_PIPE_PRECURSOR);
-      addLog(`Initiated NWIS Hackathon Demo on OIL-SYN-020: ${res.narrative}`);
+      await api.realtime.resetSimulation();
+      const msg = `Reset all simulation states on all wells`;
+      addLog(msg);
+      toast.info(msg, 'Simulation Reset');
+      setActiveStep(1);
     } catch (err: any) {
-      alert(`Demo start failed: ${err.message}`);
-    } finally {
-      setLoading(false);
+      toast.error(`Reset failed: ${err.message}`, 'Simulation Error');
     }
   };
 
-  const activeSim = status?.activeSimulations?.find((s: any) => s.wellId === selectedWell);
+  const scenarioTimeline = [
+    { time: '00:00', label: 'Normal Drilling', desc: 'Nominal torque & ROP in Upper Barail Sandstone at 3,200m' },
+    { time: '00:20', label: 'Torque Increases', desc: 'Torque variance elevated +24% above baseline (tight hole condition)' },
+    { time: '00:35', label: 'ROP Declines', desc: 'Penetration rate decays -25% as cuttings accumulate' },
+    { time: '00:50', label: 'Pattern Detected', desc: 'Multi-parameter correlation triggers feature anomaly' },
+    { time: '01:00', label: 'Precedents Matched', desc: 'Precedent Engine identifies OIL-SYN-003, 007, 012 in Barail' },
+    { time: '01:10', label: 'Risk Score Rises', desc: 'Bayesian risk engine escalates score to 79/100 [WARNING]' },
+    { time: '01:20', label: 'Alert Dispatched', desc: 'Actionable decision-support advisory sent to rig & eRTMAC' },
+  ];
+
+  const scenariosList = [
+    { key: SimulationScenario.NORMAL_DRILLING, label: 'Normal Drilling' },
+    { key: SimulationScenario.TORQUE_SPIKE, label: 'Torque Spike' },
+    { key: SimulationScenario.ROP_DROP, label: 'ROP Drop' },
+    { key: SimulationScenario.STUCK_PIPE_PRECURSOR, label: 'Stuck Pipe Precursor' },
+    { key: SimulationScenario.LOST_CIRCULATION, label: 'Lost Circulation' },
+    { key: SimulationScenario.KICK_PRECURSOR, label: 'Kick Precursor' },
+    { key: SimulationScenario.PRESSURE_ANOMALY, label: 'Pressure Anomaly' },
+    { key: SimulationScenario.FORMATION_INSTABILITY, label: 'Formation Instability' },
+  ];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-white border-2 border-black rounded-2xl p-6 shadow-[4px_4px_0px_0px_#000] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-bold tracking-tight text-white">
-              Real-Time Simulation & Demo Control Room
+          <div className="flex items-center space-x-2 text-xs font-mono font-bold text-zinc-500 mb-1">
+            <Link href="/dashboard" className="text-blue-700 hover:underline">
+              ← Command Center
+            </Link>
+            <span>/</span>
+            <span>Operations</span>
+            <span>/</span>
+            <span className="text-black font-bold">Simulator</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-black text-black tracking-tight">
+              Realtime Drilling Simulator
             </h1>
-            <span className="px-2 py-0.5 rounded text-xs font-mono bg-amber-950 text-amber-300 border border-amber-800">
-              Synthetic Replay
+            <span className="px-3 py-1 text-xs font-mono font-black uppercase tracking-wider bg-[#fef3c7] text-[#78350f] border-2 border-black rounded-full shadow-[2px_2px_0px_0px_#000]">
+              OPERATIONS TOOL
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Configure drilling telemetry scenarios, inject physical anomalies, or run the deterministic Hackathon demo.
+          <p className="text-xs text-zinc-600 mt-1">
+            Playback synthetic incident precursors to evaluate anomaly detection, risk escalation, and precedent matching.
           </p>
         </div>
 
-        <button
-          onClick={handleRunDemo}
-          className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs shadow-lg transition-colors flex items-center space-x-2"
-        >
-          <span>▶</span>
-          <span>Run NWIS Demo (1-Click)</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard"
+            className="px-4 py-2 bg-black hover:bg-zinc-800 text-white font-bold text-xs rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000] transition-all"
+          >
+            Observe in Command Center →
+          </Link>
+        </div>
       </div>
 
-      {/* Main Simulation Control Card */}
-      <div className="bg-petro-900 border border-petro-800 rounded-xl p-6 shadow-sm space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+      {/* Simulator Control Panel */}
+      <div className="bg-white border-2 border-black rounded-2xl p-6 shadow-[4px_4px_0px_0px_#000] space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
           {/* Well Selection */}
           <div>
-            <label className="text-slate-400 block font-semibold mb-1">Target Well</label>
+            <label className="text-zinc-700 font-mono font-black uppercase text-xs block mb-2">
+              TARGET MONITORED WELL:
+            </label>
             <select
               value={selectedWell}
               onChange={(e) => setSelectedWell(e.target.value)}
-              className="w-full bg-petro-950 border border-petro-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+              className="w-full bg-[#f8f9fa] text-black px-3 py-2.5 border-2 border-black rounded-xl text-xs font-bold shadow-[2px_2px_0px_0px_#000] focus:outline-none focus:ring-2 focus:ring-black"
             >
               {wells.map((w) => (
                 <option key={w.wellId} value={w.wellId}>
-                  {w.wellId} ({w.name})
+                  {w.wellId} — {w.name} [{w.status}]
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Scenario Selection */}
+          {/* Speed Multiplier */}
           <div>
-            <label className="text-slate-400 block font-semibold mb-1">Drilling Scenario</label>
+            <label className="text-zinc-700 font-mono font-black uppercase text-xs block mb-2">
+              STREAM PLAYBACK SPEED:
+            </label>
             <select
-              value={scenario}
-              onChange={(e) => setScenario(e.target.value as SimulationScenario)}
-              className="w-full bg-petro-950 border border-petro-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+              value={speedMultiplier}
+              onChange={(e) => setSpeedMultiplier(Number(e.target.value))}
+              className="w-full bg-[#f8f9fa] text-black px-3 py-2.5 border-2 border-black rounded-xl text-xs font-bold shadow-[2px_2px_0px_0px_#000] focus:outline-none focus:ring-2 focus:ring-black"
             >
-              <option value="NORMAL_DRILLING">Normal Drilling (Nominal)</option>
-              <option value="STUCK_PIPE_PRECURSOR">Stuck Pipe Precursor (Torque ↑, ROP ↓, Drag ↑)</option>
-              <option value="TORQUE_SPIKE">Torque Spike (Top Drive Feedback)</option>
-              <option value="ROP_DROP">ROP Drop / Bit Dull</option>
-              <option value="LOST_CIRCULATION">Lost Circulation (Flow Out ↓, Pit Loss)</option>
-              <option value="KICK_PRECURSOR">Kick Precursor (Flow Out ↑, Pit Gain)</option>
-              <option value="PRESSURE_ANOMALY">Standpipe Pressure Surge</option>
-              <option value="FORMATION_INSTABILITY">Formation Instability / Sloughing</option>
+              <option value="1">1x (Realtime 1Hz)</option>
+              <option value="2">2x Speed (SIH Demo Recommended)</option>
+              <option value="5">5x Speed</option>
+              <option value="10">10x Speed (Fast Forward)</option>
             </select>
           </div>
 
-          {/* Speed Multiplier */}
-          <div>
-            <label className="text-slate-400 block font-semibold mb-1">
-              Replay Speed ({speedMultiplier}x)
-            </label>
-            <div className="flex items-center space-x-1.5 pt-1">
-              {[1, 5, 10, 50, 100].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSpeedMultiplier(s)}
-                  className={`flex-1 py-1.5 rounded text-xs font-mono font-semibold transition-colors ${
-                    speedMultiplier === s
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-petro-950 text-slate-400 hover:text-white border border-petro-800'
-                  }`}
-                >
-                  {s}x
-                </button>
-              ))}
+          {/* Live Status Output */}
+          <div className="bg-[#f8f9fa] p-4 border-2 border-black rounded-xl shadow-[2px_2px_0px_0px_#000] flex flex-col justify-center">
+            <span className="text-[10px] text-zinc-500 font-mono font-black uppercase">SIMULATOR ENGINE STATE:</span>
+            <div className="text-base font-black text-black mt-1">
+              {status?.activeSimulations > 0 ? (
+                <span className="text-[#064e3b] bg-[#d1fae5] px-2.5 py-1 rounded-full border border-black inline-flex items-center gap-1.5 text-xs">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse border border-black" />
+                  Running ({status.activeSimulations} Active)
+                </span>
+              ) : (
+                <span className="text-zinc-500">Idle / Ready</span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-petro-800">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={handleStart}
-              disabled={loading}
-              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md transition-colors"
-            >
-              {activeSim ? 'Restart Stream' : 'Start Simulation'}
-            </button>
-
-            {activeSim && (
-              <>
-                {activeSim.isPaused ? (
-                  <button
-                    onClick={handleResume}
-                    className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors"
-                  >
-                    Resume
-                  </button>
-                ) : (
-                  <button
-                    onClick={handlePause}
-                    className="px-3.5 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs font-semibold transition-colors"
-                  >
-                    Pause
-                  </button>
-                )}
-
+        {/* Scenario Selector Grid */}
+        <div>
+          <label className="text-zinc-700 font-mono font-black uppercase text-xs block mb-3">
+            Pre-Configured Operational Scenarios:
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {scenariosList.map((sc) => {
+              const isSelected = scenario === sc.key;
+              return (
                 <button
-                  onClick={handleStop}
-                  className="px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition-colors"
+                  key={sc.key}
+                  type="button"
+                  onClick={() => setScenario(sc.key)}
+                  className={`p-4 text-left rounded-xl border-2 border-black text-xs transition-all shadow-[2px_2px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 ${
+                    isSelected
+                      ? 'bg-[#dbeafe] text-[#1e3a8a] font-black ring-2 ring-blue-500'
+                      : 'bg-white text-zinc-800 hover:bg-[#f8f9fa]'
+                  }`}
                 >
-                  Stop Stream
+                  <div className="text-[10px] text-zinc-500 font-mono uppercase font-black">SCENARIO</div>
+                  <div className="font-bold truncate mt-1">{sc.label}</div>
                 </button>
-              </>
-            )}
+              );
+            })}
           </div>
+        </div>
 
-          <Link
-            href="/dashboard"
-            className="px-3.5 py-2 rounded-lg bg-petro-800 hover:bg-petro-700 text-emerald-400 border border-petro-700 text-xs font-semibold transition-colors"
+        {/* Primary Controls */}
+        <div className="pt-4 border-t-2 border-black flex flex-wrap items-center gap-3">
+          <button
+            onClick={handleStart}
+            disabled={loading}
+            className="px-5 py-2.5 bg-[#2563eb] hover:bg-blue-700 text-white font-black text-xs rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_#000] transition-all flex items-center gap-2 active:translate-x-0.5 active:translate-y-0.5"
           >
-            Inspect Live Dashboard &rarr;
-          </Link>
+            <span>▶ Play Scenario</span>
+          </button>
+
+          <button
+            onClick={handlePause}
+            className="px-4 py-2.5 bg-white hover:bg-zinc-100 text-black font-black text-xs rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000] transition-all active:translate-x-0.5 active:translate-y-0.5"
+          >
+            ❚❚ Pause
+          </button>
+
+          <button
+            onClick={handleResume}
+            className="px-4 py-2.5 bg-white hover:bg-zinc-100 text-black font-black text-xs rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000] transition-all active:translate-x-0.5 active:translate-y-0.5"
+          >
+            ▶ Resume
+          </button>
+
+          <button
+            onClick={handleStop}
+            className="px-4 py-2.5 bg-[#ffe4e6] hover:bg-rose-200 text-[#881337] font-black text-xs rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000] transition-all active:translate-x-0.5 active:translate-y-0.5"
+          >
+            ■ Stop
+          </button>
+
+          <button
+            onClick={handleReset}
+            className="px-4 py-2.5 bg-[#fef08a] hover:bg-yellow-300 text-black font-black text-xs rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000] transition-all ml-auto active:translate-x-0.5 active:translate-y-0.5"
+          >
+            ↺ Reset Simulator
+          </button>
         </div>
       </div>
 
-      {/* Real-time Status Card */}
-      {activeSim && (
-        <div className="bg-petro-900 border border-emerald-800/60 rounded-xl p-5 shadow-sm space-y-3">
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-              <span className="font-semibold text-white">Simulation Session Active</span>
-              <span className="px-2 py-0.5 rounded bg-petro-950 font-mono text-emerald-400">
-                {activeSim.wellId}
-              </span>
-            </div>
-            <span className="font-mono text-slate-400">
-              Depth: <span className="text-white font-bold">{activeSim.currentDepth} m</span> / {activeSim.endDepth} m
-            </span>
+      {/* SIMULATION TIMELINE */}
+      <section className="bg-white border-2 border-black rounded-2xl p-6 shadow-[4px_4px_0px_0px_#000] space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b-2 border-black">
+          <div>
+            <h2 className="text-sm font-black text-black tracking-tight flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-amber-400 border border-black" />
+              Scenario Unfolding Timeline
+            </h2>
+            <p className="text-xs text-zinc-600 mt-0.5">
+              Chronological milestone sequence demonstrating how NWIS moves from raw sensor drift to actionable precedent corroboration.
+            </p>
           </div>
+          <span className="text-xs text-[#78350f] font-mono font-black uppercase bg-[#fef3c7] px-3 py-1 rounded-full border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+            STUCK_PIPE_PRECURSOR
+          </span>
+        </div>
 
-          {/* Progress Bar */}
-          <div className="w-full bg-slate-950 rounded-full h-2 border border-petro-800 overflow-hidden">
+        {/* Timeline Horizontal Steps */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-3">
+          {scenarioTimeline.map((step, idx) => (
             <div
-              className="bg-emerald-500 h-full transition-all duration-300"
-              style={{
-                width: `${Math.min(100, (activeSim.stepIndex / activeSim.totalSteps) * 100)}%`,
-              }}
-            />
-          </div>
-
-          <div className="flex items-center justify-between text-[11px] font-mono text-slate-500">
-            <span>Scenario: {activeSim.scenario}</span>
-            <span>Speed: {activeSim.speedMultiplier}x</span>
-            <span>Steps: {activeSim.stepIndex} / {activeSim.totalSteps}</span>
-          </div>
+              key={idx}
+              className="p-3.5 bg-[#f8f9fa] border-2 border-black rounded-xl space-y-1.5 shadow-[2px_2px_0px_0px_#000]"
+            >
+              <div className="flex items-center justify-between text-[11px] font-mono">
+                <span className="text-[#1e3a8a] font-black">{step.time}</span>
+                <span className="text-zinc-500 font-bold">STEP {idx + 1}</span>
+              </div>
+              <div className="text-xs font-black text-black tracking-tight">{step.label}</div>
+              <p className="text-[10px] text-zinc-600 leading-relaxed font-sans">
+                {step.desc}
+              </p>
+            </div>
+          ))}
         </div>
-      )}
+      </section>
 
-      {/* Simulator Event Console */}
-      <div className="bg-petro-950 border border-petro-800 rounded-xl p-4 shadow-inner">
-        <div className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2 flex items-center justify-between">
-          <span>Simulation Event Stream Log</span>
-          <span className="text-[10px] font-mono text-slate-600">Local Telemetry Ticker</span>
+      {/* Execution Logs */}
+      <div className="bg-white border-2 border-black rounded-2xl p-6 space-y-3 shadow-[4px_4px_0px_0px_#000]">
+        <div className="flex items-center justify-between text-xs border-b-2 border-black pb-3">
+          <span className="font-black uppercase text-xs font-mono text-black">Simulator Event Log:</span>
+          <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#f8f9fa] border border-black">{logMessages.length} Entries</span>
         </div>
 
-        <div className="font-mono text-[11px] text-slate-300 space-y-1 h-44 overflow-y-auto pr-2">
+        <div className="h-44 overflow-y-auto font-mono text-xs text-black space-y-1.5 bg-[#f8f9fa] p-4 rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000]">
           {logMessages.length === 0 ? (
-            <div className="text-slate-600 italic">No events logged yet. Start a simulation or run the demo.</div>
+            <div className="text-zinc-400">No events logged yet. Click [ Play Scenario ] to execute.</div>
           ) : (
-            logMessages.map((msg, i) => (
-              <div key={i} className="text-slate-300 hover:text-white">
-                {msg}
+            logMessages.map((log, i) => (
+              <div key={i} className="text-black font-semibold">
+                {log}
               </div>
             ))
           )}

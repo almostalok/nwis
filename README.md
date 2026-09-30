@@ -2,7 +2,7 @@
 ### AI/ML-Enabled Drilling Intelligence, Offset Precedent Retrieval & Explainable Risk Advisory Platform
 **Organization:** Oil India Limited (OIL) &bull; Problem Statement SIH26121  
 **Classification:** Enterprise Decision-Support Platform (OIL/eRTMAC Integration Ready)  
-**Verification Status:** 170 / 170 Passing Automated Tests Across All 4 Stages &bull; 100% Monorepo Build Success  
+**Verification Status:** 218 / 218 Passing Automated Tests Across All Verification Suites &bull; 100% Monorepo Build, Type-Check & Lint Success  
 
 ---
 
@@ -19,8 +19,8 @@ Oil India Limited's **eRTMAC (electronic Real-Time Monitoring and Advisory Centr
 > **Safety Notice & Compliance (IEC 62443):**  
 > NWIS is strictly an **advisory decision-support platform**. It possesses zero physical control over rig equipment (cannot actuate drawworks, alter WOB, change RPM, or command mud pumps). All actions require human verification and manual execution by certified drilling superintendents.
 >  
-> **Data Provenance:**  
-> In compliance with enterprise confidentiality, demonstration instances operate on a curated, high-fidelity **OIL-Compatible Synthetic Demonstration Dataset** (`OIL-SYN-001` to `OIL-SYN-020` in the fictional `NWIS-DEMO-FIELD`). The underlying adapters (`ERTMACAdapter`, `WITSMLLiveAdapter`, `DocumentLakeAdapter`) are built to standard WITSML 1.4.1.1 and 2.0 specifications, ready for immediate production hookup upon authorization.
+> **Data Provenance & Truthfulness:**  
+> In compliance with enterprise confidentiality and security boundaries, demonstration instances operate on a curated, high-fidelity **OIL-Compatible Synthetic Demonstration Dataset** (`OIL-SYN-001` to `OIL-SYN-020` in the fictional `NWIS-DEMO-FIELD`). NWIS does not currently claim a live physical network connection to OIL's production SCADA/eRTMAC network; rather, the underlying adapters (`ERTMACAdapter`, `WITSMLLiveAdapter`, `DocumentLakeAdapter`) are built to standard WITSML 1.4.1.1 and 2.0 specifications, ready for immediate production hookup upon authorization.
 
 ---
 
@@ -29,73 +29,64 @@ Oil India Limited's **eRTMAC (electronic Real-Time Monitoring and Advisory Centr
 ```
 +---------------------------------------------------------------------------------------------------+
 | STAGE 01: FOUNDATION & DATA PLATFORM                                                              |
-| PostgreSQL 16 + PostGIS • 20 OIL-Compatible Wells • 3D Trajectory Math • Ingestion Pipeline       |
+| PostgreSQL 16 + PostGIS • 20 OIL-Compatible Wells • 3D Trajectory Math • Parameterized Spatial SQL|
 +---------------------------------------------------------------------------------------------------+
                                                   |
                                                   v
 +---------------------------------------------------------------------------------------------------+
 | STAGE 02: AI DOCUMENT INTELLIGENCE & HISTORICAL PRECEDENT ENGINE                                  |
-| OCR / NLP Ingestion • 64-Dim Domain Embeddings • Hybrid Search (Keyword+Vector) • Grounded RAG    |
+| Binary PDF Parser • OCR Quality Scoring • 64-Dim Dense Embeddings • Hybrid Search • Grounded RAG  |
 +---------------------------------------------------------------------------------------------------+
                                                   |
                                                   v
 +---------------------------------------------------------------------------------------------------+
 | STAGE 03: REAL-TIME STREAMING, ANOMALY DETECTION & RISK FUSION                                    |
-| Multi-Window Features (30s/300s) • Robust MAD Z-Score • 5 Hazard Engines • 28-Min Early Warning    |
+| Real-Time SSE Transport • Multi-Window Features (30s/300s) • Robust MAD Z-Score • 5 Risk Engines  |
 +---------------------------------------------------------------------------------------------------+
                                                   |
                                                   v
 +---------------------------------------------------------------------------------------------------+
-| STAGE 04: FINAL INTEGRATION, PRODUCTION HARDENING & SIH PITCH COCKPIT                             |
-| 1-Click SIH Pitch Storyboard • Model Registry & Drift Tracking • ISO 19157 Governance • Reports    |
+| STAGE 04: FULL REMEDIATION, PRODUCTION HARDENING & COMMAND COCKPIT                                |
+| Bcrypt Hashing • Strict CORS • BullMQ/Redis Queue • /admin & /assistant • Toast Alerts • ISO 19157|
 +---------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 3. Key Platform Capabilities
+## 3. Implemented Subsystems & Providers
 
-### 3.1 1-Click SIH Pitch Demonstration Mode (`/demo`)
-* **Guided 5-Phase Storyboard:**
-  1. *Baseline Drilling:* Normal ROP (18.5 m/h) in Upper Barail Sandstone at 3,200m depth.
-  2. *Micro-Trend Anomaly:* Bit enters reactive coal seam; torque variance surges +2.8σ (Robust MAD), SPP slope increases.
-  3. *Offset Precedent Matching:* Precedent Engine identifies **94.2% match** with well `OIL-SYN-005` (4.8 km NE, 36.5h NPT incident).
-  4. *Bayesian Risk Fusion:* Dispatches CRITICAL Stuck Pipe Alert with **28.5 minutes proactive lead time**.
-  5. *Human-in-the-Loop Resolution:* Engineer authorizes offset playbook from `OIL-SYN-018` DDR; incident prevented with 0 NPT.
-* **Instant Demo Reset:** 1-click reset clears all simulation buffers and resets sessions to initial baseline.
-
-### 3.2 Real-Time Cockpit & Multi-Hazard Risk Fusion (`/dashboard`, `/alerts`)
-* **Live SSE Telemetry:** Sub-25ms Server-Sent Events stream delivering 1-second drilling parameters.
-* **Deterministic Anomaly Engines:** Rolling Z-score, Robust MAD (Median Absolute Deviation), and linear regression trend slope.
-* **5 Modular Risk Engines:**
-  - `StuckPipeRiskEngine`: Overpull margin, torque oscillation, SPP slope, Barail stickiness factor.
-  - `LostCirculationRiskEngine`: Flow-in vs flow-out mass balance, pit volume gradient, ECD vs fracture limit.
-  - `KickRiskEngine`: Dual-confirmation pit gain, return flow surge, drilling break detection.
-  - `TorqueDragRiskEngine`: Dogleg severity, soft-string friction, hookload envelope tracking.
-  - `CementingRiskEngine`: Slurry density vs mud ratio, displacement velocity, casing standoff modeling.
-
-### 3.3 Subsurface Geospatial Explorer & Precedent Catalog (`/wells`, `/search`, `/events`)
-* **PostGIS Spatial Radius Queries:** Millisecond spatial filtering by distance (`ST_DWithin`) and stratigraphic horizon.
-* **Hybrid Semantic Search:** Combines BM25 keyword matching with domain-calibrated 64-dimensional dense vector embeddings.
-* **Grounded RAG Assistant:** 100% source-backed citations linking answers directly to document chunk IDs, page numbers, and verified excerpts.
-
-### 3.4 Governance, Model Registry & Executive Dossiers (`/models`, `/data-quality`, `/reports`)
-* **Model Registry & Drift Monitoring:** Benchmarks (Precision >90%, Recall >90%, F1 >91%, False Alarm Rate <5%) with live Kolmogorov-Smirnov drift tracking.
-* **ISO 19157 Standards Compliance:** Transparent audit scoring across Completeness, Positional Accuracy, Logical Consistency, and Temporal Freshness.
-* **Executive Report Generator:** 1-click printable/exportable Markdown & PDF dossiers for well proposals, incident investigations, and daily drilling ops.
+| Component | Architecture / Provider | Status |
+| :--- | :--- | :--- |
+| **Realtime Transport** | Server-Sent Events (SSE) via `EventSource` on `/api/v1/realtime/stream` | Active (Polling Eliminated) |
+| **Password Hashing** | Bcrypt (10 rounds with automatic upgrade for legacy hashes) | Active & Enforced |
+| **CORS Policy** | Whitelist-restricted (`FRONTEND_URL`, `http://localhost:3000`) | Enforced |
+| **SQL Protection** | Parameterized Prisma queries with `Prisma.sql` (No string concatenation) | Enforced |
+| **Path Traversal Protection** | Safe directory normalization and containment verification | Enforced |
+| **Document Pipeline** | Binary PDF Parser (`pdf-parse`) + `OCRProvider` abstraction + BullMQ/Redis | Active with Async Fallback |
+| **OCR Confidence** | Printable ratio & drilling domain lexicon scoring (`VERIFICATION_REQUIRED` < 70%) | Active |
+| **Embedding Engine** | `EmbeddingProvider` (64-dim domain semantic hashing with external API hook) | Active |
+| **Vector Retrieval** | Hybrid search (BM25 keyword + cosine similarity + pre-fetched well metadata) | Active (N+1 Query Eliminated) |
+| **RAG Assistant** | `LLMProvider` with strict context builder and anti-hallucination checks | Active (`/assistant`) |
+| **Administration** | Top-level `/admin` center (Users & Roles, Audit logs, Ingestion, Models, Simulator) | Active & Protected |
+| **User Feedback** | Non-blocking inline Toast notification system (Replaces native browser `alert()`) | Active |
 
 ---
 
-## 4. Technology Stack
+## 4. Key Platform Routes
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Monorepo & Tooling** | Turborepo, pnpm workspaces, TypeScript 5.8 |
-| **Backend Core** | NestJS 10, RxJS (Server-Sent Events), Node.js 20 |
-| **Database & Spatial** | PostgreSQL 16 + PostGIS, Prisma ORM 6.19 |
-| **Frontend UI** | Next.js 15 (App Router), React 19, Tailwind CSS, Leaflet GIS |
-| **Vector Engine** | 64-dimensional domain-tokenized dense embeddings with cosine similarity |
-| **Deployment** | Multi-stage Docker (`Dockerfile.api`, `Dockerfile.web`), Docker Compose (`docker-compose.prod.yml`) |
+* **Real-Time Command Cockpit:** `http://localhost:3000/dashboard` (SSE stream with live connection status)
+* **Grounded AI Assistant:** `http://localhost:3000/assistant` (Universal RAG decision support)
+* **Administration Center:** `http://localhost:3000/admin` (Role-gated governance, users, audit, and queues)
+* **1-Click Pitch Storyboard:** `http://localhost:3000/demo` (Interactive scenario demonstration)
+* **Subsurface Wells Explorer:** `http://localhost:3000/wells` (Positional and directional well view)
+* **Cross-Well Comparison:** `http://localhost:3000/compare` (Geological similarity scoring)
+* **Semantic & Hybrid Search:** `http://localhost:3000/search` (Dense vector & keyword incident search)
+* **Operational Risk Alerts:** `http://localhost:3000/alerts` (Alert catalog and detailed dossiers)
+* **Rig Simulator Controls:** `http://localhost:3000/simulation` (Synthetic scenario injection)
+* **Model Registry & Drift:** `http://localhost:3000/models` (Safety governance and metric tracking)
+* **Data Quality Audit:** `http://localhost:3000/data-quality` (ISO 19157 compliance scoring)
+* **Executive Reports:** `http://localhost:3000/reports` (Markdown and printable operations summaries)
+* **API Documentation (Swagger):** `http://localhost:4000/api/docs`
 
 ---
 
@@ -134,48 +125,44 @@ pnpm --filter @nwis/api start:dev    # API runs at http://localhost:4000
 pnpm --filter @nwis/web dev          # Web app runs at http://localhost:3000
 ```
 
-### Accessing the Web Command Center
-Open your browser to **`http://localhost:3000`**:
-* **1-Click Pitch Storyboard:** `http://localhost:3000/demo`
-* **Real-Time Command Cockpit:** `http://localhost:3000/dashboard`
-* **Live Alerts & Precedents:** `http://localhost:3000/alerts`
-* **Rig Simulator Room:** `http://localhost:3000/simulation`
-* **Model Registry & Governance:** `http://localhost:3000/models`
-* **Data Quality & ISO 19157:** `http://localhost:3000/data-quality`
-* **Executive Reports Generator:** `http://localhost:3000/reports`
-* **OIL eRTMAC Integration Specs:** `http://localhost:3000/integrations`
-* **OpenAPI (Swagger) Documentation:** `http://localhost:4000/api/docs`
-
 ---
 
 ## 6. Verification & Automated Test Suites
 
-NWIS includes 4 comprehensive automated test suites validating all platform layers:
+NWIS includes comprehensive automated test suites validating all platform layers and security controls:
 
 ```bash
-# Run Stage 01 Suite: Database, PostGIS, Trajectory Math, Ingestion (35 Tests)
+# Stage 01 Suite: Database, PostGIS, Trajectory Math, Ingestion (35 Tests)
 pnpm test
 
-# Run Stage 02 Suite: Vector Embeddings, Hybrid Search, RAG, Precedent Engine (37 Tests)
+# Stage 02 Suite: Vector Embeddings, Hybrid Search, RAG, Precedent Engine (37 Tests)
 pnpm test:stage02
 
-# Run Stage 03 Suite: Rolling Features, Anomaly Detectors, 5 Risk Engines, Simulator (44 Tests)
+# Stage 03 Suite: Rolling Features, Anomaly Detectors, 5 Risk Engines, Simulator (44 Tests)
 pnpm test:stage03
 
-# Run Stage 04 Suite: Health Probes, Model Registry, Reports, Simulator Reset, Governance (54 Tests)
+# Stage 04 Suite: Health Probes, Model Registry, Reports, Simulator Reset, Governance (54 Tests)
 pnpm test:stage04
 
-# Full Monorepo Build Check (All 7 packages & apps)
-pnpm build
+# Security Suite: Bcrypt Hashing, Legacy Migration, Path Traversal, SQL Injection (13 Tests)
+pnpm test:security
+
+# End-to-End Suite: Monorepo Package Resolution & Integration (35 Tests)
+pnpm test:e2e
+
+# Code Quality & Compilation Verification
+pnpm type-check   # TypeScript checking across all 8 packages/apps (0 errors)
+pnpm lint         # Non-interactive ESLint across web and api (0 errors)
+pnpm build        # Optimized production build of all packages and web app
 ```
 
-**Total Automated Test Coverage:** **170 Passing Tests &bull; 0 Failures**
+**Total Automated Test Coverage:** **218 Passing Tests &bull; 0 Failures**
 
 ---
 
 ## 7. Production Docker Deployment
 
-Deploy the entire production stack (PostgreSQL + PostGIS, Redis, NestJS API, Next.js Web) with Docker Compose:
+Deploy the entire production stack (PostgreSQL + PostGIS, Redis, NestJS API, Background Worker, Next.js Web) with Docker Compose:
 
 ```bash
 # Build and run all production containers
@@ -202,15 +189,7 @@ curl http://localhost:4000/health
 
 ---
 
-## 9. Documentation Index
-
-* **[SIH Pitch Demonstration Script](file:///c:/Users/DELL/OneDrive/Desktop/codepg\products\nawis\docs\demo-script.md)**: Detailed judges pitch workflow, timing, and Q&A talking points.
-* **[Production Readiness & Hardening](file:///c:/Users/DELL/OneDrive/Desktop/codepg\products\nawis\docs\production-readiness.md)**: Cybersecurity air-gap architecture, RBAC, backups, and SLAs.
-* **[OIL eRTMAC Integration Roadmap](file:///c:/Users/DELL/OneDrive/Desktop/codepg\products\nawis\docs\integration\roadmap.md)**: Technical transition plan from synthetic demo to live Duliajan eRTMAC feeds.
-
----
-
-## 10. License & Organization Attribution
+## 9. License & Organization Attribution
 
 Developed for the **Smart India Hackathon (SIH 2024 / SIH26121)** in partnership with **Oil India Limited (OIL)**.  
 All rights reserved &bull; Restricted Enterprise Demonstration.

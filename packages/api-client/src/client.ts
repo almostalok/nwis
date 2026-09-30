@@ -73,6 +73,7 @@ export class NwisApiClient {
         body: JSON.stringify(credentials),
       }),
     me: (): Promise<UserRecord> => this.request<UserRecord>('/api/v1/auth/me'),
+    users: (): Promise<UserRecord[]> => this.request<UserRecord[]>('/api/v1/auth/users'),
   };
 
   // --- Wells API ---
@@ -201,6 +202,8 @@ export class NwisApiClient {
       this.request<any>('/api/v1/knowledge/process-all', { method: 'POST' }),
     processDocument: (id: string): Promise<any> =>
       this.request<any>(`/api/v1/knowledge/process/${id}`, { method: 'POST' }),
+    getQueueStatus: (): Promise<any> =>
+      this.request<any>('/api/v1/knowledge/queue/status'),
     verifyEntity: (id: string, options?: { value?: string; confidence?: number; notes?: string }): Promise<any> => {
       const searchParams = new URLSearchParams();
       if (options?.value) searchParams.append('value', options.value);

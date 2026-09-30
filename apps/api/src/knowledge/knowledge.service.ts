@@ -35,7 +35,7 @@ export class KnowledgeService {
     this.logger.log(`Starting knowledge processing pipeline for document: ${document.title} (${document.fileName})`);
 
     try {
-      // 1. TEXT_EXTRACTION & OCR_PROCESSING
+      // 1. TEXT_EXTRACTION
       await prisma.document.update({
         where: { id: documentId },
         data: { processingStatus: DocumentProcessingStatus.TEXT_EXTRACTION },
@@ -43,6 +43,14 @@ export class KnowledgeService {
 
       const pages = await this.extractor.extractPages(document.storagePath);
       const avgConfidence = pages.reduce((acc, p) => acc + p.confidence, 0) / (pages.length || 1);
+      const hasOcr = pages.some((p) => p.isOcr);
+
+      if (hasOcr) {
+        await prisma.document.update({
+          where: { id: documentId },
+          data: { processingStatus: DocumentProcessingStatus.OCR_PROCESSING },
+        });
+      }
 
       await prisma.document.update({
         where: { id: documentId },
@@ -56,7 +64,12 @@ export class KnowledgeService {
       // 2. CHUNKING & EMBEDDINGS
       const chunks = this.chunker.chunkPages(pages);
 
-      // Clean existing chunks for this document if re-processing
+      await prisma.document.update({
+        where: { id: documentId },
+        data: { processingStatus: DocumentProcessingStatus.EMBEDDING },
+      });
+
+      // Clean existing chunks for this document if re-processing (idempotency)
       await prisma.documentChunk.deleteMany({
         where: { documentId },
       });
@@ -160,6 +173,11 @@ export class KnowledgeService {
 
         // 4. EVENT_EXTRACTION & DEDUPLICATION WITH EVIDENCE
         if (associatedWellId && entities.events.length > 0) {
+          await prisma.document.update({
+            where: { id: documentId },
+            data: { processingStatus: DocumentProcessingStatus.EVENT_EXTRACTION },
+          });
+
           for (const ev of entities.events) {
             await this.eventDeduplicator.recordOrAttachEvidence({
               wellId: associatedWellId,
@@ -179,17 +197,25 @@ export class KnowledgeService {
         }
       }
 
-      // 5. EMBEDDING & COMPLETED
+      // 5. Check OCR Confidence & Finalize
+      const finalStatus =
+        avgConfidence < 0.70
+          ? DocumentProcessingStatus.VERIFICATION_REQUIRED
+          : DocumentProcessingStatus.COMPLETED;
+
       await prisma.document.update({
         where: { id: documentId },
         data: {
-          processingStatus: DocumentProcessingStatus.COMPLETED,
-          extractionStatus: 'COMPLETED',
+          processingStatus: finalStatus,
+          extractionStatus:
+            finalStatus === DocumentProcessingStatus.VERIFICATION_REQUIRED
+              ? 'VERIFICATION_REQUIRED: Average extraction confidence below 70%'
+              : 'COMPLETED',
         },
       });
 
       this.logger.log(
-        `Document [${document.title}] processed successfully. Chunks: ${chunks.length}, Events linked: ${extractedEventsCount}`,
+        `Document [${document.title}] processed successfully. Chunks: ${chunks.length}, Events linked: ${extractedEventsCount}, Status: ${finalStatus}`,
       );
 
       return {
@@ -197,7 +223,7 @@ export class KnowledgeService {
         documentId,
         chunksCreated: chunks.length,
         eventsExtracted: extractedEventsCount,
-        status: DocumentProcessingStatus.COMPLETED,
+        status: finalStatus,
       };
     } catch (err: any) {
       this.logger.error(`Failed processing document [${documentId}]: ${err.message}`, err.stack);

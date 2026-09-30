@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { EventType, OperationalEvent } from '@nwis/types';
+import Link from 'next/link';
 
 export default function EventsPage() {
   const [events, setEvents] = useState<OperationalEvent[]>([]);
@@ -65,53 +66,77 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">
-          Historical Precedent Retrieval Engine
-        </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          eRTMAC tells what is happening now. NWIS tells what happened before in comparable offset wells.
-        </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+      {/* Top Header Card */}
+      <div className="bg-white border-2 border-black rounded-2xl p-6 shadow-[4px_4px_0px_0px_#000] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center space-x-2 text-xs font-mono font-bold text-zinc-500 mb-1">
+            <Link href="/dashboard" className="text-blue-700 hover:underline">
+              ← Command Center
+            </Link>
+            <span>/</span>
+            <span>Historical</span>
+            <span>/</span>
+            <span className="text-black font-bold">Precedent Retrieval</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-black text-black tracking-tight">
+              Historical Precedent Retrieval Engine
+            </h1>
+            <span className="px-3 py-1 text-xs font-mono font-black uppercase tracking-wider bg-[#dbeafe] text-[#1e3a8a] border-2 border-black rounded-full shadow-[2px_2px_0px_0px_#000]">
+              PRECEDENTS
+            </span>
+          </div>
+          <p className="text-xs text-zinc-600 mt-1">
+            eRTMAC tells what is happening now. NWIS tells what happened before in comparable offset wells.
+          </p>
+        </div>
+
+        <Link
+          href="/compare"
+          className="px-4 py-2 bg-black hover:bg-zinc-800 text-white font-bold text-xs rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000] transition-all"
+        >
+          Cross-Well Compare →
+        </Link>
       </div>
 
       {/* QUICK PRECEDENT BENCHMARK PRESETS */}
-      <div className="bg-petro-900 border border-petro-800 rounded-xl p-4 space-y-3">
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+      <div className="bg-white border-2 border-black rounded-2xl p-6 space-y-3 shadow-[4px_4px_0px_0px_#000]">
+        <span className="text-xs font-black text-black uppercase tracking-wider block font-mono">
           Benchmark Precedent Discovery Presets
         </span>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2.5">
           <button
             onClick={() => loadPrecedentPreset('Barail Sandstone', 3150, 3250, EventType.STUCK_PIPE)}
-            className="px-3 py-1.5 rounded-lg bg-red-950 hover:bg-red-900 border border-red-800 text-red-200 text-xs font-semibold flex items-center space-x-2 transition-colors"
+            className="px-4 py-2 rounded-full bg-[#ffe4e6] hover:bg-rose-200 border-2 border-black text-[#881337] text-xs font-black flex items-center space-x-2 shadow-[2px_2px_0px_0px_#000] transition-all active:translate-x-0.5 active:translate-y-0.5"
           >
-            <span>Barail Sandstone (~3200m) Stuck Pipe (Wells 003, 007, 012)</span>
+            <span>⚠️ Barail Sandstone (~3200m) Stuck Pipe (Wells 003, 007, 012)</span>
           </button>
           <button
             onClick={() => loadPrecedentPreset('Tipam Sandstone', 2100, 2150, EventType.LOST_CIRCULATION)}
-            className="px-3 py-1.5 rounded-lg bg-amber-950 hover:bg-amber-900 border border-amber-800 text-amber-200 text-xs font-semibold flex items-center space-x-2 transition-colors"
+            className="px-4 py-2 rounded-full bg-[#fef3c7] hover:bg-amber-200 border-2 border-black text-[#78350f] text-xs font-black flex items-center space-x-2 shadow-[2px_2px_0px_0px_#000] transition-all active:translate-x-0.5 active:translate-y-0.5"
           >
-            <span>Tipam Sandstone (~2120m) Lost Circulation (Wells 005, 014)</span>
+            <span>⚠️ Tipam Sandstone (~2120m) Lost Circulation (Wells 005, 014)</span>
           </button>
           <button
             onClick={() => loadPrecedentPreset('Kopili Shale', 3600, 3700, EventType.KICK)}
-            className="px-3 py-1.5 rounded-lg bg-purple-950 hover:bg-purple-900 border border-purple-800 text-purple-200 text-xs font-semibold flex items-center space-x-2 transition-colors"
+            className="px-4 py-2 rounded-full bg-[#ede9fe] hover:bg-purple-200 border-2 border-black text-[#5b21b6] text-xs font-black flex items-center space-x-2 shadow-[2px_2px_0px_0px_#000] transition-all active:translate-x-0.5 active:translate-y-0.5"
           >
-            <span>Kopili Shale (~3650m) Gas Kick Incident (Well 009)</span>
+            <span>⚠️ Kopili Shale (~3650m) Gas Kick Incident (Well 009)</span>
           </button>
         </div>
       </div>
 
       {/* Search & Query Builder */}
-      <div className="bg-petro-900 border border-petro-800 rounded-xl p-5 space-y-4 shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="bg-white border-2 border-black rounded-2xl p-6 space-y-5 shadow-[4px_4px_0px_0px_#000]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Geological Formation</label>
+            <label className="block text-xs font-black text-zinc-700 mb-1.5 font-mono uppercase">Geological Formation</label>
             <select
               value={formation}
               onChange={(e) => setFormation(e.target.value)}
-              className="w-full bg-petro-950 border border-petro-700 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none"
+              className="w-full bg-[#f8f9fa] border-2 border-black rounded-xl px-3 py-2.5 text-xs text-black font-bold shadow-[2px_2px_0px_0px_#000] focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="">All Formations</option>
               <option value="Barail Sandstone">Barail Sandstone</option>
@@ -123,11 +148,11 @@ export default function EventsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Event Type</label>
+            <label className="block text-xs font-black text-zinc-700 mb-1.5 font-mono uppercase">Event Type</label>
             <select
               value={eventType}
               onChange={(e) => setEventType(e.target.value)}
-              className="w-full bg-petro-950 border border-petro-700 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none"
+              className="w-full bg-[#f8f9fa] border-2 border-black rounded-xl px-3 py-2.5 text-xs text-black font-bold shadow-[2px_2px_0px_0px_#000] focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="">All Event Types</option>
               <option value="STUCK_PIPE">STUCK_PIPE</option>
@@ -140,64 +165,64 @@ export default function EventsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Min Depth (m)</label>
+            <label className="block text-xs font-black text-zinc-700 mb-1.5 font-mono uppercase">Min Depth (m)</label>
             <input
               type="number"
               placeholder="e.g. 3100"
               value={minDepth}
               onChange={(e) => setMinDepth(e.target.value)}
-              className="w-full bg-petro-950 border border-petro-700 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none font-mono"
+              className="w-full bg-[#f8f9fa] border-2 border-black rounded-xl px-3 py-2.5 text-xs text-black font-mono font-bold shadow-[2px_2px_0px_0px_#000] focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Max Depth (m)</label>
+            <label className="block text-xs font-black text-zinc-700 mb-1.5 font-mono uppercase">Max Depth (m)</label>
             <input
               type="number"
               placeholder="e.g. 3300"
               value={maxDepth}
               onChange={(e) => setMaxDepth(e.target.value)}
-              className="w-full bg-petro-950 border border-petro-700 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none font-mono"
+              className="w-full bg-[#f8f9fa] border-2 border-black rounded-xl px-3 py-2.5 text-xs text-black font-mono font-bold shadow-[2px_2px_0px_0px_#000] focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
           <div className="flex items-end">
             <button
               onClick={fetchEvents}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1.5 rounded-lg text-xs transition-colors"
+              className="w-full bg-black hover:bg-zinc-800 text-white font-black py-2.5 rounded-xl text-xs border-2 border-black shadow-[2px_2px_0px_0px_#000] transition-all active:translate-x-0.5 active:translate-y-0.5"
             >
               Apply Filter
             </button>
           </div>
         </div>
 
-        {/* Near-Depth Query Bar (Section 30) */}
-        <div className="pt-3 border-t border-petro-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center space-x-2">
-            <span className="font-semibold text-amber-400">Target Depth Window:</span>
+        {/* Near-Depth Query Bar */}
+        <div className="pt-4 border-t-2 border-black flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-black text-black font-mono">Target Depth Window:</span>
             <input
               type="number"
               value={targetDepth}
               onChange={(e) => setTargetDepth(e.target.value)}
-              className="w-24 bg-petro-950 border border-petro-700 rounded px-2 py-1 text-xs font-mono text-white"
+              className="w-24 bg-[#f8f9fa] border-2 border-black rounded-xl px-3 py-1.5 text-xs font-mono text-black font-black shadow-[2px_2px_0px_0px_#000]"
             />
-            <span className="text-slate-400">m &plusmn;</span>
+            <span className="text-black font-bold">m &plusmn;</span>
             <input
               type="number"
               value={tolerance}
               onChange={(e) => setTolerance(e.target.value)}
-              className="w-16 bg-petro-950 border border-petro-700 rounded px-2 py-1 text-xs font-mono text-white"
+              className="w-16 bg-[#f8f9fa] border-2 border-black rounded-xl px-3 py-1.5 text-xs font-mono text-black font-black shadow-[2px_2px_0px_0px_#000]"
             />
-            <span className="text-slate-400">meters</span>
+            <span className="text-black font-bold">meters</span>
             <button
               onClick={handleNearDepthSearch}
-              className="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-slate-950 font-semibold rounded text-xs transition-colors"
+              className="px-4 py-2 bg-[#dbeafe] hover:bg-blue-200 text-[#1e3a8a] border-2 border-black font-black rounded-xl text-xs shadow-[2px_2px_0px_0px_#000] transition-all active:translate-x-0.5 active:translate-y-0.5"
             >
               Query Near-Depth Precedents
             </button>
           </div>
-          <span className="text-slate-400">
-            Found <strong className="text-white">{events.length}</strong> matching precedent events
+          <span className="text-black font-mono font-bold bg-[#f8f9fa] px-3 py-1 rounded-full border border-black">
+            Found <strong className="text-black font-black">{events.length}</strong> matching precedent events
           </span>
         </div>
       </div>
@@ -205,99 +230,100 @@ export default function EventsPage() {
       {/* Results List */}
       <div className="space-y-4">
         {loading ? (
-          <div className="py-12 text-center text-slate-400 text-xs">
-            Querying precedent index...
+          <div className="py-16 text-center text-zinc-600 text-xs font-mono font-bold bg-white border-2 border-black rounded-2xl shadow-[4px_4px_0px_0px_#000]">
+            <div className="inline-block w-8 h-8 border-4 border-black border-t-[#2563eb] rounded-full animate-spin mb-3"></div>
+            <p>Querying precedent index...</p>
           </div>
         ) : events.length === 0 ? (
-          <div className="py-12 text-center text-slate-400 bg-petro-900 border border-petro-800 rounded-xl">
+          <div className="py-16 text-center text-zinc-600 bg-white border-2 border-black rounded-2xl shadow-[4px_4px_0px_0px_#000] font-bold">
             No historical precedent events match the current criteria.
           </div>
         ) : (
           events.map((ev: any) => (
             <div
               key={ev.id}
-              className="bg-petro-900 border border-petro-800 hover:border-slate-600 rounded-xl p-5 space-y-3 transition-colors shadow-sm"
+              className="bg-white border-2 border-black rounded-2xl p-6 space-y-4 hover:shadow-[6px_6px_0px_0px_#000] transition-all shadow-[4px_4px_0px_0px_#000]"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b-2 border-black">
                 <div className="flex items-center space-x-3">
-                  <a
+                  <Link
                     href={`/wells/${ev.well?.wellId || ev.wellId}`}
-                    className="font-mono font-bold text-sm text-emerald-400 hover:underline"
+                    className="font-mono font-black text-sm text-[#1e3a8a] hover:underline"
                   >
                     {ev.well?.wellId || ev.wellId}
-                  </a>
-                  <span className="text-xs text-slate-400">({ev.well?.name})</span>
+                  </Link>
+                  <span className="text-xs text-zinc-600 font-bold">({ev.well?.name})</span>
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    className={`px-3 py-1 rounded-full text-[10px] font-black font-mono uppercase border-2 border-black shadow-[1.5px_1.5px_0px_0px_#000] ${
                       ev.eventType === 'STUCK_PIPE'
-                        ? 'bg-red-950 text-red-300 border border-red-800'
+                        ? 'bg-[#ffe4e6] text-[#881337]'
                         : ev.eventType === 'LOST_CIRCULATION'
-                        ? 'bg-amber-950 text-amber-300 border border-amber-800'
-                        : 'bg-purple-950 text-purple-300 border border-purple-800'
+                        ? 'bg-[#fef3c7] text-[#78350f]'
+                        : 'bg-[#ede9fe] text-[#5b21b6]'
                     }`}
                   >
                     {ev.eventType}
                   </span>
-                  <span className="font-mono text-xs font-semibold text-white">
+                  <span className="font-mono text-xs font-black text-black bg-[#f8f9fa] px-2.5 py-0.5 rounded-full border border-black">
                     {ev.startDepth} m MD
                   </span>
                   {ev.formation && (
-                    <span className="text-xs text-emerald-400 font-medium">
+                    <span className="text-xs text-black font-bold">
                       &bull; {ev.formation.formationName}
                     </span>
                   )}
                 </div>
 
                 <div className="flex items-center space-x-3 text-xs">
-                  <span className="text-slate-400">
+                  <span className="text-zinc-600 font-mono font-bold">
                     Severity:{' '}
                     <strong
-                      className={
+                      className={`px-2 py-0.5 rounded border border-black font-black uppercase text-[10px] ${
                         ev.severity === 'CRITICAL'
-                          ? 'text-red-400'
+                          ? 'bg-[#ffe4e6] text-[#881337]'
                           : ev.severity === 'HIGH'
-                          ? 'text-amber-400'
-                          : 'text-slate-300'
-                      }
+                          ? 'bg-[#fef3c7] text-[#78350f]'
+                          : 'bg-zinc-100 text-black'
+                      }`}
                     >
                       {ev.severity}
                     </strong>
                   </span>
-                  <span className="font-mono text-emerald-400 text-xs font-semibold">
+                  <span className="font-mono text-[#064e3b] text-xs font-black bg-[#d1fae5] px-2.5 py-0.5 rounded-full border border-black">
                     Confidence: {(ev.confidence * 100).toFixed(0)}%
                   </span>
                 </div>
               </div>
 
-              <p className="text-xs text-slate-200 leading-relaxed font-sans">{ev.description}</p>
+              <p className="text-xs text-black leading-relaxed font-semibold">{ev.description}</p>
 
-              {/* Precedent Insights: Root Cause and Mitigation */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-petro-950 p-3 rounded-lg border border-petro-800">
+              {/* Precedent Insights */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs bg-[#f8f9fa] p-4 rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000]">
                 <div>
-                  <span className="text-slate-400 block font-semibold text-[11px] mb-0.5">
+                  <span className="text-zinc-600 block font-black text-[11px] mb-1 uppercase font-mono">
                     Root Cause:
                   </span>
-                  <span className="text-slate-300 leading-relaxed">{ev.rootCause || 'N/A'}</span>
+                  <span className="text-black font-semibold leading-relaxed">{ev.rootCause || 'N/A'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block font-semibold text-[11px] mb-0.5">
-                    Mitigation & Recovery:
+                  <span className="text-zinc-600 block font-black text-[11px] mb-1 uppercase font-mono">
+                    Mitigation &amp; Recovery:
                   </span>
-                  <span className="text-slate-300 leading-relaxed">{ev.mitigation || 'N/A'}</span>
+                  <span className="text-black font-semibold leading-relaxed">{ev.mitigation || 'N/A'}</span>
                 </div>
               </div>
 
               {/* Provenance footer */}
-              <div className="pt-2 border-t border-petro-800/80 flex flex-wrap items-center justify-between text-[11px] text-slate-400">
+              <div className="pt-2 border-t-2 border-black/10 flex flex-wrap items-center justify-between text-xs text-zinc-600 font-mono">
                 <div>
                   Source Document:{' '}
-                  <span className="font-mono text-emerald-400">
+                  <span className="text-[#1e3a8a] font-black">
                     {ev.document?.fileName || 'Daily Drilling Report (DDR)'}
                   </span>{' '}
                   (Page {ev.sourcePage || 1})
                 </div>
                 <div>
-                  Verified By: <span className="text-slate-300">{ev.verifiedBy || 'Superintendent'}</span>
+                  Verified By: <span className="text-black font-bold">{ev.verifiedBy || 'Superintendent'}</span>
                 </div>
               </div>
             </div>

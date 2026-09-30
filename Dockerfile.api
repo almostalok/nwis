@@ -15,6 +15,7 @@ COPY apps/api/ ./apps/api/
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @nwis/database db:generate
 RUN pnpm --filter @nwis/types build
+RUN pnpm --filter @nwis/validation build
 RUN pnpm --filter @nwis/database build
 RUN pnpm --filter @nwis/utils build
 RUN pnpm --filter @nwis/api-client build
@@ -38,6 +39,7 @@ RUN pnpm --filter @nwis/database db:generate
 # Copy built distribution artifacts from builder
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/packages/types/dist ./packages/types/dist
+COPY --from=builder /app/packages/validation/dist ./packages/validation/dist
 COPY --from=builder /app/packages/database/dist ./packages/database/dist
 COPY --from=builder /app/packages/utils/dist ./packages/utils/dist
 COPY --from=builder /app/packages/api-client/dist ./packages/api-client/dist

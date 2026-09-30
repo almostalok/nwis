@@ -57,7 +57,7 @@ export function WellMap({
 
   // Map state
   const [mapEngine, setMapEngine] = useState<'GOOGLE_MAPS' | 'LEAFLET_FALLBACK'>('GOOGLE_MAPS');
-  const [mapType, setMapType] = useState<'DARK' | 'SATELLITE' | 'TERRAIN' | 'ROADMAP'>('DARK');
+  const [mapType, setMapType] = useState<'DARK' | 'SATELLITE' | 'TERRAIN' | 'ROADMAP'>('ROADMAP');
   const [loadingEngine, setLoadingEngine] = useState<boolean>(true);
   const [engineError, setEngineError] = useState<string | null>(null);
 
@@ -599,27 +599,27 @@ export function WellMap({
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex flex-col">
+    <div className="bg-white border-2 border-black rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_#000000] flex flex-col font-sans">
       {/* Top Map Toolbar */}
-      <div className="p-3 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="p-3 bg-[#f4f4f6] border-b-2 border-black flex flex-wrap items-center justify-between gap-3 text-xs">
         {/* Left Engine & Status */}
         <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1.5 bg-slate-900 px-2.5 py-1 rounded border border-slate-800">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="font-semibold text-white">
+          <div className="flex items-center space-x-1.5 bg-white px-2.5 py-1 rounded-full border-2 border-black text-black shadow-[1.5px_1.5px_0px_0px_#000]">
+            <span className="w-2 h-2 rounded-full bg-[#10b981] border border-black animate-pulse" />
+            <span className="font-extrabold text-black text-xs tracking-tight">
               {mapEngine === 'GOOGLE_MAPS' ? 'Google Maps Enterprise' : 'Esri OpenGIS'}
             </span>
-            <span className="text-[10px] font-mono text-emerald-400">
-              {mapEngine === 'GOOGLE_MAPS' ? 'OIL GIS Live' : 'Free OpenSource'}
+            <span className="neo-badge neo-badge-emerald text-[9px] py-0">
+              {mapEngine === 'GOOGLE_MAPS' ? 'LIVE GIS' : 'OPENSOURCE'}
             </span>
           </div>
 
-          <span className="text-slate-400 hidden sm:inline">
-            Center: <span className="font-mono text-slate-200">{centerLat.toFixed(3)}°N, {centerLng.toFixed(3)}°E</span>
+          <span className="text-zinc-700 hidden sm:inline text-xs font-mono font-bold">
+            Origin: <span className="text-black font-extrabold">{centerLat.toFixed(3)}°N, {centerLng.toFixed(3)}°E</span>
           </span>
 
           {loadingEngine && (
-            <span className="text-emerald-400 animate-pulse font-mono text-[11px]">
+            <span className="text-amber-800 animate-pulse text-xs font-bold font-mono">
               Loading Google Maps API...
             </span>
           )}
@@ -628,52 +628,52 @@ export function WellMap({
         {/* Right Map Controls: Style Switcher & Radius */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Map Type Switcher */}
-          <div className="flex rounded-lg bg-slate-900 p-0.5 border border-slate-800 text-[11px] font-medium">
-              {(
-                [
-                  { id: 'DARK', label: 'Dark Petro' },
-                  { id: 'SATELLITE', label: 'Satellite' },
-                  { id: 'TERRAIN', label: 'Terrain' },
-                  { id: 'ROADMAP', label: 'Roadmap' },
-                ] as const
-              ).map((type) => (
-                <button
-                  key={type.id}
-                  onClick={() => setMapType(type.id)}
-                  className={`px-2.5 py-1 rounded transition-colors ${
-                    mapType === type.id
-                      ? 'bg-emerald-600 text-white font-semibold shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {type.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex bg-white p-0.5 rounded-full border-2 border-black shadow-[2px_2px_0px_0px_#000] text-xs">
+            {(
+              [
+                { id: 'ROADMAP', label: 'Street' },
+                { id: 'TERRAIN', label: 'Terrain' },
+                { id: 'SATELLITE', label: 'Satellite' },
+                { id: 'DARK', label: 'Dark' },
+              ] as const
+            ).map((type) => (
+              <button
+                key={type.id}
+                onClick={() => setMapType(type.id)}
+                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${
+                  mapType === type.id
+                    ? 'bg-black text-white shadow-[1px_1px_0px_0px_#000]'
+                    : 'text-black hover:bg-zinc-100'
+                }`}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
 
           {/* Radius Filter Toggle */}
           <button
             onClick={() => setEnableRadiusFilter(!enableRadiusFilter)}
-            className={`px-2.5 py-1 rounded text-[11px] font-semibold border transition-colors flex items-center space-x-1.5 ${
+            className={`px-3 py-1 text-xs font-bold rounded-full border-2 border-black transition-all flex items-center space-x-1 shadow-[2px_2px_0px_0px_#000] ${
               enableRadiusFilter
-                ? 'bg-emerald-950 text-emerald-300 border-emerald-700'
-                : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                ? 'bg-[#f59e0b] text-black'
+                : 'bg-white text-black hover:bg-zinc-100'
             }`}
           >
-            <span>🎯 Radius Filter:</span>
-            <span className="font-mono">{enableRadiusFilter ? `${radiusKm} km (ON)` : 'OFF'}</span>
+            <span>Radius:</span>
+            <span>{enableRadiusFilter ? `${radiusKm} km` : 'Off'}</span>
           </button>
 
           {enableRadiusFilter && (
-            <div className="flex items-center space-x-1 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+            <div className="flex items-center space-x-0.5 bg-white p-0.5 rounded-full border-2 border-black shadow-[2px_2px_0px_0px_#000] text-xs">
               {[5, 10, 15, 25, 50].map((r) => (
                 <button
                   key={r}
                   onClick={() => setRadiusKm(r)}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
+                  className={`px-2 py-0.5 text-xs font-bold rounded-full ${
                     radiusKm === r
-                      ? 'bg-emerald-600 text-white font-bold'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-black text-white shadow-[1px_1px_0px_0px_#000]'
+                      : 'text-black hover:bg-zinc-100'
                   }`}
                 >
                   {r}k
@@ -685,25 +685,27 @@ export function WellMap({
           {/* Quick Actions */}
           <button
             onClick={handleFitBounds}
-            className="px-2 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded border border-slate-800 text-[11px]"
+            aria-label="Fit map view to all filtered wells"
+            className="px-3 py-1 bg-white hover:bg-zinc-100 text-black border-2 border-black rounded-full text-xs font-bold transition-all shadow-[2px_2px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5"
             title="Fit view to all filtered wells"
           >
-            ⤢ Fit All
+            Fit All
           </button>
           <button
             onClick={handleCenterDuliajan}
-            className="px-2 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded border border-slate-800 text-[11px]"
+            aria-label="Center map on Duliajan, Assam"
+            className="px-3 py-1 bg-white hover:bg-zinc-100 text-black border-2 border-black rounded-full text-xs font-bold transition-all shadow-[2px_2px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5"
             title="Center on Duliajan, Assam"
           >
-            📍 Duliajan
+            Duliajan HQ
           </button>
         </div>
       </div>
 
       {engineError && (
-        <div className="bg-emerald-950/60 border-b border-emerald-800/60 px-4 py-1.5 text-xs text-emerald-200 flex items-center justify-between">
-          <span>🌿 Google Maps demo key requires billing &mdash; Activated free open-source Esri GIS basemap (No API key needed)</span>
-          <span className="text-[10px] font-mono text-emerald-400 font-semibold">Free Mode Active</span>
+        <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2 text-xs text-emerald-800 flex items-center justify-between font-medium">
+          <span>🌿 Open-Source Esri GIS Basemap Active (No External API Keys Required)</span>
+          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Active</span>
         </div>
       )}
 
@@ -711,27 +713,27 @@ export function WellMap({
       <div className="flex flex-col lg:flex-row relative flex-1">
         {/* Interactive Sidebar with Filtered Wells List */}
         {showSidebarList && (
-          <div className="w-full lg:w-80 bg-slate-950/95 border-b lg:border-b-0 lg:border-r border-slate-800 flex flex-col max-h-[560px]">
+          <div className="w-full lg:w-80 bg-white border-b lg:border-b-0 lg:border-r border-zinc-200/80 flex flex-col max-h-[560px]">
             {/* Sidebar Header */}
-            <div className="p-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-950">
+            <div className="p-3 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
               <div>
-                <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                <span className="text-xs font-semibold text-zinc-900 uppercase tracking-wide">
                   Filtered Wells
                 </span>
-                <span className="text-[11px] text-slate-400 block font-mono">
-                  Showing {displayWells.length} matching criteria
+                <span className="text-xs text-zinc-500 block">
+                  {displayWells.length} Matching Criteria
                 </span>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
+              <span className="px-2 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200">
                 {displayWells.length} Active
               </span>
             </div>
 
             {/* Scrollable Wells Card List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60 p-2 space-y-1">
+            <div className="flex-1 overflow-y-auto divide-y divide-zinc-100 p-2 space-y-1.5">
               {displayWells.length === 0 ? (
-                <div className="p-8 text-center text-xs text-slate-500">
-                  No wells match the current spatial and parameter filters.
+                <div className="p-8 text-center text-xs text-zinc-400">
+                  No wells match current spatial filters
                 </div>
               ) : (
                 displayWells.map((w) => {
@@ -745,29 +747,31 @@ export function WellMap({
                       onClick={() => handleSelectWellFromList(w)}
                       onMouseEnter={() => setActiveWellCardHover(w.id)}
                       onMouseLeave={() => setActiveWellCardHover(null)}
-                      className={`p-2.5 rounded-lg border cursor-pointer transition-all text-left ${
+                      className={`p-3 rounded-xl border transition-all text-left cursor-pointer ${
                         isSelected
-                          ? 'bg-slate-900 border-emerald-500 shadow-md ring-1 ring-emerald-500/50'
+                          ? 'bg-blue-50/70 border-blue-500 shadow-sm ring-2 ring-blue-500/20'
                           : isHovered
-                          ? 'bg-slate-900/80 border-slate-700'
-                          : 'bg-slate-950/60 border-slate-800/60 hover:border-slate-700'
+                          ? 'bg-zinc-50 border-zinc-300'
+                          : 'bg-white border-zinc-200/70'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold font-mono text-emerald-400">
+                        <span className="text-xs font-bold text-zinc-900 font-mono">
                           {w.wellId}
                         </span>
                         <div className="flex items-center space-x-1.5">
                           {hasEvents && (
-                            <span className="w-2 h-2 rounded-full bg-rose-500" title="Historical Incident" />
+                            <span className="px-1.5 py-0.2 text-[9px] bg-rose-500 text-white font-bold rounded-full" title="Historical Incident">
+                              !
+                            </span>
                           )}
                           <span
-                            className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-semibold ${
+                            className={`text-[10px] px-2 py-0.5 font-semibold uppercase tracking-wider rounded-full border ${
                               w.status === 'DRILLING'
-                                ? 'bg-blue-950 text-blue-300 border border-blue-800'
+                                ? 'bg-blue-50 text-blue-700 border-blue-200'
                                 : w.status === 'COMPLETED'
-                                ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                                : 'bg-slate-800 text-slate-300'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-zinc-100 text-zinc-600 border-zinc-200'
                             }`}
                           >
                             {w.status}
@@ -775,13 +779,13 @@ export function WellMap({
                         </div>
                       </div>
 
-                      <div className="text-xs font-medium text-slate-200 truncate mt-1">
+                      <div className="text-xs font-semibold text-zinc-800 truncate mt-1">
                         {w.name}
                       </div>
 
-                      <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono mt-2 pt-1.5 border-t border-slate-800/60">
-                        <span>Depth: <strong className="text-slate-200">{w.totalDepth}m</strong></span>
-                        <span>Type: {w.wellType}</span>
+                      <div className="flex items-center justify-between text-xs text-zinc-500 mt-2 pt-1.5 border-t border-zinc-100">
+                        <span>Depth: <strong className="text-zinc-800 font-mono">{w.totalDepth}m</strong></span>
+                        <span className="text-[11px]">{w.wellType}</span>
                       </div>
                     </div>
                   );
@@ -790,7 +794,7 @@ export function WellMap({
             </div>
 
             {/* Sidebar Footer Stats */}
-            <div className="p-2.5 border-t border-slate-800 bg-slate-950 text-[10px] text-slate-400 flex justify-between font-mono">
+            <div className="p-3 border-t border-zinc-100 bg-zinc-50 text-xs text-zinc-500 flex justify-between">
               <span>OIL-SYN-001..020</span>
               <span>Assam-Arakan Basin</span>
             </div>
@@ -802,35 +806,35 @@ export function WellMap({
           <div ref={mapContainerRef} className="w-full h-full min-h-[500px]" />
 
           {/* Floating Map Legend (Bottom Right) */}
-          <div className="absolute bottom-3 right-3 z-10 bg-slate-950/90 backdrop-blur border border-slate-800 rounded-lg p-2.5 text-[11px] text-slate-300 shadow-xl space-y-1.5 hidden sm:block pointer-events-auto font-mono">
-            <div className="font-bold text-slate-400 uppercase text-[9px] tracking-wider mb-1">
-              Rig & Well Status Legend
+          <div className="absolute bottom-4 right-4 z-10 bg-white/95 backdrop-blur-md border border-zinc-200/80 rounded-2xl p-3.5 text-xs text-zinc-700 shadow-lg space-y-1.5 hidden sm:block pointer-events-auto">
+            <div className="font-semibold text-zinc-900 uppercase text-[10px] tracking-wider mb-1.5 border-b border-zinc-100 pb-1">
+              Well Classification Legend
             </div>
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 border border-white" />
-              <span>DRILLING (Active Real-Time Telemetry)</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-xs" />
+              <span>Drilling [Live Telemetry Stream]</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
-              <span>COMPLETED (Production / Shut-in)</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" />
+              <span>Completed [Historical Offset]</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 border border-white" />
-              <span>PLANNED / PROPOSED WELL</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-xs" />
+              <span>Planned / Proposed Well</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-white" />
-              <span>HAZARD / INCIDENT PRECEDENT (!)</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-xs" />
+              <span>Hazard / Incident Precedent (!)</span>
             </div>
           </div>
 
           {/* Floating Search Status Badge (Bottom Left) */}
-          <div className="absolute bottom-3 left-3 z-10 bg-slate-950/90 backdrop-blur border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 shadow-lg pointer-events-auto">
-            <span className="text-slate-400">Total Filtered: </span>
-            <span className="font-bold text-emerald-400 font-mono">{displayWells.length}</span> wells{' '}
+          <div className="absolute bottom-4 left-4 z-10 bg-white/95 backdrop-blur-md border border-zinc-200/80 rounded-xl px-3 py-1.5 text-xs text-zinc-700 shadow-md pointer-events-auto flex items-center gap-1.5">
+            <span className="text-zinc-500 font-medium">Filtered: </span>
+            <span className="font-bold text-zinc-900">{displayWells.length}</span> wells{' '}
             {enableRadiusFilter && (
-              <span className="text-slate-400">
-                within <span className="font-mono text-emerald-400 font-semibold">{radiusKm} km</span> radius
+              <span className="text-zinc-500 ml-1">
+                (Within <strong className="text-emerald-700 font-semibold">{radiusKm} km</strong>)
               </span>
             )}
           </div>

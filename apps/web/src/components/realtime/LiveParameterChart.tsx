@@ -20,169 +20,129 @@ interface LiveParameterChartProps {
 
 export function LiveParameterChart({ history, selectedWell }: LiveParameterChartProps) {
   const [overlayMode, setOverlayMode] = useState<'TORQUE_ROP' | 'TORQUE_DRAG' | 'FLOW_BALANCE' | 'SPP_FLOW'>('TORQUE_ROP');
-  const [timeWindowSec, setTimeWindowSec] = useState<number>(300); // 5m default
 
-  const points = history.slice(-Math.min(history.length, 60)); // recent points
+  const points = history.slice(-Math.min(history.length, 60));
 
-  // Define active traces based on overlay mode
   let primaryKey: keyof ChartPoint = 'torque';
   let primaryLabel = 'Torque';
-  let primaryColor = '#f59e0b'; // amber
+  let primaryColor = '#d97706';
   let primaryUnit = 'kNm';
 
   let secondaryKey: keyof ChartPoint = 'rop';
   let secondaryLabel = 'ROP';
-  let secondaryColor = '#10b981'; // emerald
+  let secondaryColor = '#059669';
   let secondaryUnit = 'm/hr';
 
   if (overlayMode === 'TORQUE_DRAG') {
     primaryKey = 'torque';
     primaryLabel = 'Torque';
-    primaryColor = '#f59e0b';
+    primaryColor = '#d97706';
     primaryUnit = 'kNm';
 
     secondaryKey = 'drag';
     secondaryLabel = 'Drag';
-    secondaryColor = '#ef4444'; // red
+    secondaryColor = '#e11d48';
     secondaryUnit = 'kN';
   } else if (overlayMode === 'FLOW_BALANCE') {
     primaryKey = 'flowIn';
     primaryLabel = 'Flow In';
-    primaryColor = '#3b82f6'; // blue
+    primaryColor = '#2563eb';
     primaryUnit = 'L/min';
 
     secondaryKey = 'flowOut';
     secondaryLabel = 'Flow Out';
-    secondaryColor = '#a855f7'; // purple
+    secondaryColor = '#e11d48';
     secondaryUnit = 'L/min';
   } else if (overlayMode === 'SPP_FLOW') {
     primaryKey = 'spp';
-    primaryLabel = 'Standpipe Press.';
-    primaryColor = '#06b6d4'; // cyan
-    primaryUnit = 'bar';
+    primaryLabel = 'SPP';
+    primaryColor = '#2563eb';
+    primaryUnit = 'psi';
 
     secondaryKey = 'flowIn';
     secondaryLabel = 'Flow In';
-    secondaryColor = '#3b82f6';
+    secondaryColor = '#d97706';
     secondaryUnit = 'L/min';
   }
 
-  // Calculate scales
-  const primaryValues = points.map((p) => Number(p[primaryKey] ?? 0)).filter((v) => !isNaN(v));
-  const secondaryValues = points.map((p) => Number(p[secondaryKey] ?? 0)).filter((v) => !isNaN(v));
+  const primaryValues = points.map((p) => p[primaryKey] as number).filter((v) => typeof v === 'number' && !isNaN(v));
+  const secondaryValues = points.map((p) => p[secondaryKey] as number).filter((v) => typeof v === 'number' && !isNaN(v));
 
   const pMin = primaryValues.length > 0 ? Math.floor(Math.min(...primaryValues) * 0.9) : 0;
-  const pMax = primaryValues.length > 0 ? Math.ceil(Math.max(...primaryValues) * 1.1) || 10 : 10;
+  const pMax = primaryValues.length > 0 ? Math.ceil(Math.max(...primaryValues) * 1.1) : 100;
 
   const sMin = secondaryValues.length > 0 ? Math.floor(Math.min(...secondaryValues) * 0.9) : 0;
-  const sMax = secondaryValues.length > 0 ? Math.ceil(Math.max(...secondaryValues) * 1.1) || 10 : 10;
+  const sMax = secondaryValues.length > 0 ? Math.ceil(Math.max(...secondaryValues) * 1.1) : 100;
 
   const width = 640;
-  const height = 220;
-  const padding = { top: 20, right: 45, bottom: 25, left: 45 };
-
+  const height = 180;
+  const padding = { top: 20, right: 45, bottom: 20, left: 45 };
   const innerWidth = width - padding.left - padding.right;
   const innerHeight = height - padding.top - padding.bottom;
 
-  const getX = (index: number) => {
-    if (points.length <= 1) return padding.left;
-    return padding.left + (index / (points.length - 1)) * innerWidth;
-  };
-
-  const getPrimaryY = (val: number) => {
-    if (pMax === pMin) return padding.top + innerHeight / 2;
-    return padding.top + innerHeight - ((val - pMin) / (pMax - pMin)) * innerHeight;
-  };
-
-  const getSecondaryY = (val: number) => {
-    if (sMax === sMin) return padding.top + innerHeight / 2;
-    return padding.top + innerHeight - ((val - sMin) / (sMax - sMin)) * innerHeight;
-  };
-
-  // Generate SVG path strings
   let primaryPath = '';
   let secondaryPath = '';
 
   points.forEach((pt, i) => {
-    const x = getX(i);
-    const pVal = Number(pt[primaryKey] ?? pMin);
-    const sVal = Number(pt[secondaryKey] ?? sMin);
+    const x = padding.left + (i / Math.max(points.length - 1, 1)) * innerWidth;
 
-    const py = getPrimaryY(pVal);
-    const sy = getSecondaryY(sVal);
+    const pVal = pt[primaryKey] as number;
+    if (typeof pVal === 'number' && !isNaN(pVal) && pMax > pMin) {
+      const pNorm = (pVal - pMin) / (pMax - pMin);
+      const y1 = padding.top + innerHeight * (1 - pNorm);
+      primaryPath += `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y1.toFixed(1)} `;
+    }
 
-    if (i === 0) {
-      primaryPath += `M ${x} ${py}`;
-      secondaryPath += `M ${x} ${sy}`;
-    } else {
-      primaryPath += ` L ${x} ${py}`;
-      secondaryPath += ` L ${x} ${sy}`;
+    const sVal = pt[secondaryKey] as number;
+    if (typeof sVal === 'number' && !isNaN(sVal) && sMax > sMin) {
+      const sNorm = (sVal - sMin) / (sMax - sMin);
+      const y2 = padding.top + innerHeight * (1 - sNorm);
+      secondaryPath += `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y2.toFixed(1)} `;
     }
   });
 
   return (
-    <div className="bg-petro-900 border border-petro-800 rounded-lg p-4 shadow-sm">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-petro-800 gap-2">
+    <div className="bg-white border-2 border-black rounded-2xl p-5 shadow-[4px_4px_0px_0px_#000000] font-sans">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b-2 border-black gap-3">
         <div>
-          <div className="text-xs uppercase tracking-wider text-slate-400 font-semibold flex items-center space-x-2">
-            <span>Multi-Parameter Real-Time Correlation</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-petro-800 text-emerald-400 font-mono">
+          <div className="text-xs font-mono uppercase tracking-wider text-black font-black flex items-center space-x-2">
+            <span>Real-Time Parameter Correlation</span>
+            <span className="neo-badge neo-badge-emerald text-[10px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] border border-black animate-pulse" />
               Live Stream
             </span>
           </div>
-          <div className="text-xs text-slate-500 font-mono mt-0.5">
-            Well: {selectedWell} &bull; Depth: {points.length > 0 ? `${points[points.length - 1].depth} m` : '---'}
+          <div className="text-xs text-zinc-700 font-mono font-bold mt-1">
+            WELL: <span className="text-black font-extrabold">{selectedWell}</span> &bull; DEPTH: <span className="text-black font-extrabold">{points.length > 0 ? `${points[points.length - 1].depth}m MD` : '---'}</span>
           </div>
         </div>
 
         {/* Overlay Mode Selector */}
-        <div className="flex items-center space-x-1 bg-petro-950 p-1 rounded-md border border-petro-800 text-[11px]">
-          <button
-            onClick={() => setOverlayMode('TORQUE_ROP')}
-            className={`px-2 py-1 rounded transition-colors ${
-              overlayMode === 'TORQUE_ROP'
-                ? 'bg-amber-600/30 text-amber-300 font-semibold'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Torque + ROP
-          </button>
-          <button
-            onClick={() => setOverlayMode('TORQUE_DRAG')}
-            className={`px-2 py-1 rounded transition-colors ${
-              overlayMode === 'TORQUE_DRAG'
-                ? 'bg-red-600/30 text-red-300 font-semibold'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Torque + Drag
-          </button>
-          <button
-            onClick={() => setOverlayMode('FLOW_BALANCE')}
-            className={`px-2 py-1 rounded transition-colors ${
-              overlayMode === 'FLOW_BALANCE'
-                ? 'bg-blue-600/30 text-blue-300 font-semibold'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Flow In vs Out
-          </button>
-          <button
-            onClick={() => setOverlayMode('SPP_FLOW')}
-            className={`px-2 py-1 rounded transition-colors ${
-              overlayMode === 'SPP_FLOW'
-                ? 'bg-cyan-600/30 text-cyan-300 font-semibold'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            SPP + Flow
-          </button>
+        <div className="flex items-center space-x-1 bg-[#f4f4f6] p-1 rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000] text-xs font-mono">
+          {[
+            { mode: 'TORQUE_ROP', label: 'TORQUE + ROP' },
+            { mode: 'TORQUE_DRAG', label: 'TORQUE + DRAG' },
+            { mode: 'FLOW_BALANCE', label: 'FLOW IN / OUT' },
+            { mode: 'SPP_FLOW', label: 'SPP + FLOW' },
+          ].map((item) => (
+            <button
+              key={item.mode}
+              onClick={() => setOverlayMode(item.mode as any)}
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                overlayMode === item.mode
+                  ? 'bg-black text-white shadow-[1px_1px_0px_0px_#000]'
+                  : 'text-black hover:bg-white'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* SVG Chart Canvas */}
-      <div className="relative mt-2">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-48 select-none">
+      <div className="relative mt-3">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44 select-none">
           {/* Background Grid Lines */}
           {[0, 0.25, 0.5, 0.75, 1].map((r, i) => {
             const y = padding.top + innerHeight * r;
@@ -193,9 +153,10 @@ export function LiveParameterChart({ history, selectedWell }: LiveParameterChart
                 y1={y}
                 x2={width - padding.right}
                 y2={y}
-                stroke="#1e293b"
-                strokeDasharray="4 4"
+                stroke="#000000"
+                strokeDasharray="3 3"
                 strokeWidth="1"
+                opacity="0.15"
               />
             );
           })}
@@ -206,7 +167,7 @@ export function LiveParameterChart({ history, selectedWell }: LiveParameterChart
               d={primaryPath}
               fill="none"
               stroke={primaryColor}
-              strokeWidth="2.5"
+              strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
@@ -218,55 +179,55 @@ export function LiveParameterChart({ history, selectedWell }: LiveParameterChart
               d={secondaryPath}
               fill="none"
               stroke={secondaryColor}
-              strokeWidth="2.5"
+              strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           )}
 
           {/* Left Y Axis (Primary) */}
-          <text x={padding.left - 8} y={padding.top + 4} fill={primaryColor} fontSize="10" textAnchor="end" fontFamily="monospace">
+          <text x={padding.left - 8} y={padding.top + 4} fill={primaryColor} fontSize="11" textAnchor="end" fontFamily="JetBrains Mono, monospace" fontWeight="900">
             {pMax}
           </text>
-          <text x={padding.left - 8} y={padding.top + innerHeight} fill={primaryColor} fontSize="10" textAnchor="end" fontFamily="monospace">
+          <text x={padding.left - 8} y={padding.top + innerHeight} fill={primaryColor} fontSize="11" textAnchor="end" fontFamily="JetBrains Mono, monospace" fontWeight="900">
             {pMin}
           </text>
 
           {/* Right Y Axis (Secondary) */}
-          <text x={width - padding.right + 8} y={padding.top + 4} fill={secondaryColor} fontSize="10" textAnchor="start" fontFamily="monospace">
+          <text x={width - padding.right + 8} y={padding.top + 4} fill={secondaryColor} fontSize="11" textAnchor="start" fontFamily="JetBrains Mono, monospace" fontWeight="900">
             {sMax}
           </text>
-          <text x={width - padding.right + 8} y={padding.top + innerHeight} fill={secondaryColor} fontSize="10" textAnchor="start" fontFamily="monospace">
+          <text x={width - padding.right + 8} y={padding.top + innerHeight} fill={secondaryColor} fontSize="11" textAnchor="start" fontFamily="JetBrains Mono, monospace" fontWeight="900">
             {sMin}
           </text>
         </svg>
 
         {/* Legend */}
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-petro-800/60 text-xs">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1.5">
-              <span className="w-3 h-1 rounded" style={{ backgroundColor: primaryColor }} />
-              <span className="text-slate-300 font-medium">{primaryLabel} ({primaryUnit})</span>
+        <div className="flex items-center justify-between mt-3 pt-3 border-t-2 border-black text-xs font-mono">
+          <div className="flex items-center space-x-5">
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full border border-black" style={{ backgroundColor: primaryColor }} />
+              <span className="text-black font-extrabold uppercase">{primaryLabel} [{primaryUnit}]:</span>
               {points.length > 0 && (
-                <span className="font-mono text-white font-semibold">
+                <span className="text-black font-black">
                   {points[points.length - 1][primaryKey] ?? '---'}
                 </span>
               )}
             </div>
 
-            <div className="flex items-center space-x-1.5">
-              <span className="w-3 h-1 rounded" style={{ backgroundColor: secondaryColor }} />
-              <span className="text-slate-300 font-medium">{secondaryLabel} ({secondaryUnit})</span>
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full border border-black" style={{ backgroundColor: secondaryColor }} />
+              <span className="text-black font-extrabold uppercase">{secondaryLabel} [{secondaryUnit}]:</span>
               {points.length > 0 && (
-                <span className="font-mono text-white font-semibold">
+                <span className="text-black font-black">
                   {points[points.length - 1][secondaryKey] ?? '---'}
                 </span>
               )}
             </div>
           </div>
 
-          <div className="text-[11px] text-slate-500 font-mono">
-            {points.length} samples streaming
+          <div className="text-[11px] text-zinc-600 font-mono font-bold">
+            [{points.length} SAMPLES STREAMING]
           </div>
         </div>
       </div>

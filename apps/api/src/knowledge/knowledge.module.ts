@@ -6,6 +6,8 @@ import { EventDeduplicationService } from './event-deduplication.service';
 import { KnowledgeService } from './knowledge.service';
 import { KnowledgeController } from './knowledge.controller';
 
+import { DocumentQueueService } from './document-queue.service';
+
 @Module({
   controllers: [KnowledgeController],
   providers: [
@@ -17,7 +19,14 @@ import { KnowledgeController } from './knowledge.controller';
     DocumentChunkerService,
     EventDeduplicationService,
     KnowledgeService,
+    DocumentQueueService,
   ],
-  exports: [KnowledgeService, OCRProvider, DocumentExtractorService, DocumentChunkerService],
+  exports: [
+    KnowledgeService,
+    DocumentQueueService,
+    OCRProvider,
+    DocumentExtractorService,
+    DocumentChunkerService,
+  ],
 })
 export class KnowledgeModule {}

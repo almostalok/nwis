@@ -17,9 +17,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const hashedInput = CryptoUtils.sha256(passwordPlain);
-    if (user.passwordHash !== hashedInput) {
+    const isPasswordValid = await CryptoUtils.verifyPassword(passwordPlain, user.passwordHash);
+    if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Auto-upgrade legacy SHA-256 hash to bcrypt on successful login
+    if (!user.passwordHash.startsWith('$2a$') && !user.passwordHash.startsWith('$2b$')) {
+      const newBcryptHash = await CryptoUtils.hashPassword(passwordPlain);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash: newBcryptHash },
+      });
     }
 
     if (!user.active) {
@@ -77,5 +86,21 @@ export class AuthService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  async listUsers(): Promise<UserRecord[]> {
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: 'asc' },
+    });
+    return users.map((user) => ({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role as any,
+      department: user.department,
+      active: user.active,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }));
   }
 }

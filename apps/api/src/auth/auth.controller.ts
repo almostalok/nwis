@@ -7,6 +7,10 @@ import { UserRecord } from '@nwis/types';
 
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
+import { RolesGuard } from './roles.guard';
+import { Roles } from './roles.decorator';
+import { UserRole } from '@nwis/types';
+
 class LoginDto {
   @IsEmail()
   email!: string;
@@ -33,5 +37,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current authenticated user profile' })
   async getProfile(@CurrentUser() user: any): Promise<UserRecord> {
     return this.authService.getProfile(user.id);
+  }
+
+  @Get('users')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all user accounts and roles (Requires ADMIN or MANAGER)' })
+  async listUsers(): Promise<UserRecord[]> {
+    return this.authService.listUsers();
   }
 }

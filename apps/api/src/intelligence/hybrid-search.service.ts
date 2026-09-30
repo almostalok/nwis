@@ -45,6 +45,14 @@ export class HybridSearchService {
       take: 100,
     });
 
+    // 3.5. Pre-fetch target well once outside loop to eliminate N+1 query
+    let targetWell: any = null;
+    if (wellId && radiusKm) {
+      targetWell = await prisma.well.findFirst({
+        where: { OR: [{ id: wellId }, { wellId: wellId }] },
+      });
+    }
+
     const searchResults: SearchResultItem[] = [];
 
     // Score and rank chunks
@@ -55,19 +63,14 @@ export class HybridSearchService {
       }
 
       // Filter by radius if wellId and radius specified
-      if (wellId && radiusKm && chunk.document.well) {
-        const targetWell = await prisma.well.findFirst({
-          where: { OR: [{ id: wellId }, { wellId: wellId }] },
-        });
-        if (targetWell) {
-          const dist = SpatialUtils.haversineDistanceKm(
-            targetWell.latitude,
-            targetWell.longitude,
-            chunk.document.well.latitude,
-            chunk.document.well.longitude,
-          );
-          if (dist > radiusKm) continue;
-        }
+      if (wellId && radiusKm && chunk.document.well && targetWell) {
+        const dist = SpatialUtils.haversineDistanceKm(
+          targetWell.latitude,
+          targetWell.longitude,
+          chunk.document.well.latitude,
+          chunk.document.well.longitude,
+        );
+        if (dist > radiusKm) continue;
       }
 
       // 1. Vector similarity

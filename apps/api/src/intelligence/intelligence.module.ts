@@ -6,9 +6,20 @@ import { RAGService } from './rag.service';
 import { IntelligenceService } from './intelligence.service';
 import { IntelligenceController } from './intelligence.controller';
 
+import { ConfigurableExternalLLMProvider, LLMProvider } from './llm.provider';
+import { ConfigurableExternalEmbeddingProvider, EmbeddingProvider } from './embedding.provider';
+
 @Module({
   controllers: [IntelligenceController],
   providers: [
+    {
+      provide: LLMProvider,
+      useClass: ConfigurableExternalLLMProvider,
+    },
+    {
+      provide: EmbeddingProvider,
+      useClass: ConfigurableExternalEmbeddingProvider,
+    },
     WellSimilarityService,
     PrecedentEngineService,
     HybridSearchService,
@@ -16,6 +27,8 @@ import { IntelligenceController } from './intelligence.controller';
     IntelligenceService,
   ],
   exports: [
+    LLMProvider,
+    EmbeddingProvider,
     WellSimilarityService,
     PrecedentEngineService,
     HybridSearchService,

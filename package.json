@@ -10,6 +10,8 @@
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "test": "turbo run test",
+    "test:security": "pnpm dlx tsx tests/security-test-suite.ts",
+    "test:e2e": "pnpm dlx tsx tests/e2e-test-suite.ts",
     "test:stage02": "pnpm dlx tsx tests/stage02-verification-suite.ts",
     "test:stage03": "pnpm dlx tsx tests/stage03-verification-suite.ts",
     "test:stage04": "pnpm dlx tsx tests/stage04-integration-suite.ts",
@@ -21,8 +23,10 @@
     "clean": "turbo run clean && rimraf node_modules"
   },
   "devDependencies": {
+    "dotenv": "^16.6.1",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.23.15",
     "turbo": "^2.4.4",
-    "typescript": "^5.8.2",
-    "rimraf": "^6.0.1"
+    "typescript": "^5.8.2"
   }
 }

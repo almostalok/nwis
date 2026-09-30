@@ -9,12 +9,14 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@nwis/types": "workspace:*"
+    "@nwis/types": "workspace:*",
+    "bcryptjs": "^3.0.3"
   },
   "devDependencies": {
     "@nwis/config": "workspace:*",
+    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^22.13.9",
-    "typescript": "^5.8.2",
-    "rimraf": "^6.0.1"
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2"
   }
 }

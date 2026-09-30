@@ -59,6 +59,24 @@ services:
       timeout: 5s
       retries: 3
 
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: nwis-worker-prod
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://nwis_admin:${POSTGRES_PASSWORD:-nwis_secure_password_2026}@postgres:5432/nwis_prod?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-oil_nwis_super_secret_production_key_2026}
+      IS_WORKER: "true"
+
   web:
     build:
       context: .

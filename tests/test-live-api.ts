@@ -1,10 +1,26 @@
 async function testApi() {
   console.log('Testing Live Realtime API Endpoints on http://localhost:4000 ...');
-  
+
+  // 0. Authenticate as Lead Drilling Engineer to obtain JWT
+  console.log('Authenticating as engineer@nwis.oil.in...');
+  const loginRes = await fetch('http://localhost:4000/api/v1/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'engineer@nwis.oil.in', password: 'password123' }),
+  });
+  const loginData = await loginRes.json();
+  const token = loginData.token;
+  console.log('✓ Successfully authenticated. User:', loginData.user?.name, '| Role:', loginData.user?.role);
+
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+
   // 1. Run simulation with high speed to trigger the precursor phase
   const startRes = await fetch('http://localhost:4000/api/v1/realtime/simulator/start', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders,
     body: JSON.stringify({
       wellId: 'OIL-SYN-020',
       scenario: 'STUCK_PIPE_PRECURSOR',
@@ -35,29 +51,39 @@ async function testApi() {
     const alertId = alertsData[0].id;
     console.log('✓ Found Alert:', alertId, '| Title:', alertsData[0].title, '| Status:', alertsData[0].status, '| Score:', alertsData[0].score);
 
-    // 4. Test Acknowledge
-    const ackRes = await fetch(`http://localhost:4000/api/v1/alerts/${alertId}/acknowledge`, {
+    // 4. Test Unauthenticated Acknowledge should be rejected with 401
+    const unauthAckRes = await fetch(`http://localhost:4000/api/v1/alerts/${alertId}/acknowledge`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ actor: 'Lead Drilling Engineer', note: 'Acknowledged in automated test' }),
+      body: JSON.stringify({ note: 'Attempting unauthenticated mutation' }),
+    });
+    console.log('✓ Unauthenticated Mutation Status (Expected 401):', unauthAckRes.status);
+
+    // 5. Test Authenticated Acknowledge
+    const ackRes = await fetch(`http://localhost:4000/api/v1/alerts/${alertId}/acknowledge`, {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({ note: 'Acknowledged in automated test' }),
     });
     const ackData = await ackRes.json();
     console.log('✓ Acknowledged Result Status:', ackData.status);
 
-    // 5. Test Resolve
+    // 6. Test Authenticated Resolve
     const resRes = await fetch(`http://localhost:4000/api/v1/alerts/${alertId}/resolve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ actor: 'Lead Drilling Engineer', note: 'Resolved in automated test' }),
+      headers: authHeaders,
+      body: JSON.stringify({ note: 'Resolved in automated test' }),
     });
     const resData = await resRes.json();
     console.log('✓ Resolved Result Status:', resData.status);
   }
 
-  // 6. Stop simulation
+  // 7. Stop simulation
   await fetch('http://localhost:4000/api/v1/realtime/simulator/stop', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders,
+    body: JSON.stringify({ wellId: 'OIL-SYN-020' }),
+  });
     body: JSON.stringify({ wellId: 'OIL-SYN-020' }),
   });
   console.log('Simulation stopped cleanly.');

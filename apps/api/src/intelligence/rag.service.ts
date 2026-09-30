@@ -4,6 +4,7 @@ import { RAGEvidenceSource, RAGQueryDto, RAGResponse } from '@nwis/types';
 import { DomainNLPUtils } from '@nwis/utils';
 import { HybridSearchService } from './hybrid-search.service';
 import { PrecedentEngineService } from './precedent-engine.service';
+import { LLMProvider } from './llm.provider';
 
 @Injectable()
 export class RAGService {
@@ -12,6 +13,7 @@ export class RAGService {
   constructor(
     private readonly precedentEngine: PrecedentEngineService,
     private readonly hybridSearch: HybridSearchService,
+    private readonly llmProvider: LLMProvider,
   ) {}
 
   /**
@@ -137,29 +139,25 @@ export class RAGService {
       };
     }
 
-    // 6. Synthesize Grounded Operational Response
+    // 6. Context Builder & LLM Provider Call
     const topPrecedents = precedentResult ? precedentResult.precedents.slice(0, 3) : [];
-    const affectedWells = Array.from(new Set(topPrecedents.map((p) => p.wellId)));
-
-    let answer = `### Historical Context & Precedent Summary\n\n`;
-    if (topPrecedents.length > 0) {
-      answer += `Based on indexed drilling reports, **${topPrecedents.length} comparable historical situations** were identified in offset wells around ${targetDepth || 'similar'}m MD:\n\n`;
-      for (const prec of topPrecedents) {
-        answer += `* **Well ${prec.wellId}** (${prec.distanceKm} km away, **${(prec.similarityScore * 100).toFixed(0)}% similarity**): Experienced **${prec.eventType}** at **${prec.depth}m** in **${prec.formation}**.\n`;
-        if (prec.precedingIndicators.length > 0) {
-          answer += `  * *Precursor Signature:* ${prec.precedingIndicators.join(', ')}.\n`;
-        }
-        if (prec.mitigation) {
-          answer += `  * *Action Taken:* ${prec.mitigation}\n`;
-        }
-      }
-      answer += `\n**Key Operational Observation:** Multiple comparable wells in this interval encountered torque spikes and declining ROP prior to differential sticking or operational incidents. Immediate monitoring of drag and string rotation is recommended.`;
-    } else {
-      answer += `Relevant historical documentation retrieved from indexed well reports confirms matching operational activities in the specified formation/depth.`;
+    
+    let contextBuilder = `### Retrived Precedents and Excerpts\n`;
+    for (const prec of topPrecedents) {
+      contextBuilder += `* **Well ${prec.wellId}** (${prec.distanceKm} km away, ${(prec.similarityScore * 100).toFixed(0)}% similarity): ${prec.eventType} at ${prec.depth}m in ${prec.formation}. Indicators: ${prec.precedingIndicators.join(', ')}. Action: ${prec.mitigation || 'Standard procedure'}.\n`;
+    }
+    for (const src of evidenceSources.slice(0, 3)) {
+      contextBuilder += `Source: ${src.documentTitle} (p. ${src.pageNumber}) - ${src.excerpt}\n`;
     }
 
+    const llmCompletion = await this.llmProvider.generateCompletion({
+      systemPrompt: 'You are NWIS Grounded Drilling Intelligence Assistant for Oil India Limited. You must answer questions using exclusively the provided technical context without inventing facts.',
+      userPrompt: question,
+      context: contextBuilder,
+    });
+
     return {
-      answer,
+      answer: llmCompletion.content,
       grounded: true,
       confidence: 'HIGH',
       evidenceSources: evidenceSources.slice(0, 5),

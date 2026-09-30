@@ -1,9 +1,21 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { api } from '../../lib/api';
-import { Well, WellStatus, WellType } from '@nwis/types';
-import { WellMap } from '../../components/WellMap';
+import { Well } from '@nwis/types';
+
+const WellMap = dynamic(
+  () => import('../../components/WellMap').then((mod) => mod.WellMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-full w-full flex items-center justify-center bg-zinc-50 text-xs font-mono text-zinc-500 rounded-2xl border border-zinc-200">
+        [INITIALIZING WELL MAP OVERLAY...]
+      </div>
+    ),
+  }
+);
 
 export default function WellsPage() {
   const [wells, setWells] = useState<Well[]>([]);
@@ -119,34 +131,34 @@ export default function WellsPage() {
     onlyHazards;
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 font-sans">
       {/* Header & KPI Summary */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-white border-2 border-black rounded-2xl p-6 shadow-[4px_4px_0px_0px_#000] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800 uppercase tracking-wider font-mono">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#d1fae5] text-[#064e3b] border-2 border-black uppercase tracking-wider font-mono shadow-[2px_2px_0px_0px_#000]">
               Oil India Limited &bull; Assam-Arakan Basin
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-950 text-blue-300 border border-blue-800 uppercase tracking-wider font-mono">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#dbeafe] text-[#1e3a8a] border-2 border-black uppercase tracking-wider font-mono shadow-[2px_2px_0px_0px_#000]">
               Google Maps Enterprise GIS
             </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h1 className="text-2xl font-black tracking-tight text-black mt-2">
             Well Master Registry & Subsurface GIS
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-zinc-600 font-medium mt-0.5">
             Interactive multi-criteria spatial exploration across all 20 OIL synthetic exploration and development wells
           </p>
         </div>
 
         {/* View Mode Switcher */}
-        <div className="flex items-center space-x-1 bg-slate-950 border border-slate-800 p-1 rounded-lg">
+        <div className="flex items-center space-x-1.5 bg-[#f4f4f6] p-1.5 rounded-xl border-2 border-black shadow-[2px_2px_0px_0px_#000]">
           <button
             onClick={() => setViewMode('split')}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center space-x-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center space-x-1.5 ${
               viewMode === 'split'
-                ? 'bg-emerald-600 text-white font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-black text-white shadow-sm'
+                : 'text-zinc-700 hover:text-black'
             }`}
           >
             <span>◫</span>
@@ -154,10 +166,10 @@ export default function WellsPage() {
           </button>
           <button
             onClick={() => setViewMode('map')}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center space-x-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center space-x-1.5 ${
               viewMode === 'map'
-                ? 'bg-emerald-600 text-white font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-black text-white shadow-sm'
+                : 'text-zinc-700 hover:text-black'
             }`}
           >
             <span>🗺️</span>
@@ -165,10 +177,10 @@ export default function WellsPage() {
           </button>
           <button
             onClick={() => setViewMode('table')}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center space-x-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center space-x-1.5 ${
               viewMode === 'table'
-                ? 'bg-emerald-600 text-white font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-black text-white shadow-sm'
+                : 'text-zinc-700 hover:text-black'
             }`}
           >
             <span>☰</span>
@@ -178,55 +190,55 @@ export default function WellsPage() {
       </div>
 
       {/* Quick Filter Presets Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white px-5 py-3.5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_#000] text-xs">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-slate-400 font-mono text-[11px] uppercase">Quick Presets:</span>
+          <span className="text-black font-mono text-[11px] uppercase tracking-wider font-black">Quick Presets:</span>
           <button
             onClick={() => handleQuickFilter('ALL')}
-            className={`px-2.5 py-1 rounded text-xs transition-colors font-medium ${
+            className={`px-3 py-1 rounded-full text-xs font-black font-mono border-2 border-black transition hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 ${
               !hasActiveFilters
-                ? 'bg-slate-800 text-emerald-400 font-semibold border border-slate-700'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                ? 'bg-black text-white shadow-[2px_2px_0px_0px_#000]'
+                : 'bg-white text-black shadow-[2px_2px_0px_0px_#000] hover:bg-zinc-100'
             }`}
           >
             All Wells ({wells.length})
           </button>
           <button
             onClick={() => handleQuickFilter('DRILLING')}
-            className={`px-2.5 py-1 rounded text-xs transition-colors font-medium ${
+            className={`px-3 py-1 rounded-full text-xs font-black font-mono border-2 border-black transition hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 ${
               statusFilter === 'DRILLING'
-                ? 'bg-blue-900 text-blue-200 font-semibold border border-blue-700'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                ? 'bg-[#2563eb] text-white shadow-[2px_2px_0px_0px_#000]'
+                : 'bg-[#dbeafe] text-[#1e3a8a] shadow-[2px_2px_0px_0px_#000]'
             }`}
           >
             Active Drilling (3)
           </button>
           <button
             onClick={() => handleQuickFilter('STUCK_PIPE')}
-            className={`px-2.5 py-1 rounded text-xs transition-colors font-medium ${
+            className={`px-3 py-1 rounded-full text-xs font-black font-mono border-2 border-black transition hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 ${
               formationFilter === 'Barail' && onlyHazards
-                ? 'bg-rose-900 text-rose-200 font-semibold border border-rose-700'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                ? 'bg-[#ef4444] text-white shadow-[2px_2px_0px_0px_#000]'
+                : 'bg-[#ffe4e6] text-[#881337] shadow-[2px_2px_0px_0px_#000]'
             }`}
           >
             ⚠️ Barail Stuck Pipe Precedents
           </button>
           <button
             onClick={() => handleQuickFilter('TIPAM_LOSS')}
-            className={`px-2.5 py-1 rounded text-xs transition-colors font-medium ${
+            className={`px-3 py-1 rounded-full text-xs font-black font-mono border-2 border-black transition hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 ${
               formationFilter === 'Tipam' && onlyHazards
-                ? 'bg-amber-900 text-amber-200 font-semibold border border-amber-700'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                ? 'bg-[#f59e0b] text-white shadow-[2px_2px_0px_0px_#000]'
+                : 'bg-[#fef3c7] text-[#78350f] shadow-[2px_2px_0px_0px_#000]'
             }`}
           >
             ⚠️ Tipam Mud Losses
           </button>
           <button
             onClick={() => handleQuickFilter('DEEP_EXPLORATION')}
-            className={`px-2.5 py-1 rounded text-xs transition-colors font-medium ${
+            className={`px-3 py-1 rounded-full text-xs font-black font-mono border-2 border-black transition hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 ${
               depthFilter === 'DEEP'
-                ? 'bg-purple-900 text-purple-200 font-semibold border border-purple-700'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900'
+                ? 'bg-purple-700 text-white shadow-[2px_2px_0px_0px_#000]'
+                : 'bg-purple-100 text-purple-900 shadow-[2px_2px_0px_0px_#000]'
             }`}
           >
             Deep Exploration (&gt;4,000m)
@@ -236,19 +248,19 @@ export default function WellsPage() {
         {hasActiveFilters && (
           <button
             onClick={handleResetFilters}
-            className="text-xs text-rose-400 hover:text-rose-300 underline font-mono flex items-center space-x-1"
+            className="text-xs text-rose-700 hover:text-rose-900 font-mono font-black flex items-center space-x-1 px-2.5 py-1 bg-[#ffe4e6] border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000]"
           >
             <span>✕ Clear Filters</span>
           </button>
         )}
       </div>
 
-      {/* Comprehensive Filter Bar (Like Reference Petroleum Exploration Portals) */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm space-y-3">
+      {/* Comprehensive Filter Bar */}
+      <div className="bg-white border-2 border-black rounded-2xl p-5 shadow-[4px_4px_0px_0px_#000] space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {/* 1. Keyword Search */}
           <div className="lg:col-span-2">
-            <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">
+            <label className="block text-[10px] font-mono uppercase text-black font-black mb-1">
               Search Well / Field
             </label>
             <input
@@ -256,19 +268,19 @@ export default function WellsPage() {
               placeholder="e.g. OIL-SYN-001, Discovery..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-[#f8f8fb] border-2 border-black rounded-xl px-3 py-2 text-xs font-mono font-bold text-black placeholder-zinc-400 focus:outline-none shadow-[2px_2px_0px_0px_#000]"
             />
           </div>
 
           {/* 2. Status Filter */}
           <div>
-            <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">
+            <label className="block text-[10px] font-mono uppercase text-black font-black mb-1">
               Drilling Status
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 outline-none focus:border-emerald-500"
+              className="w-full bg-[#f8f8fb] border-2 border-black rounded-xl px-2.5 py-2 text-xs font-mono font-bold text-black outline-none shadow-[2px_2px_0px_0px_#000]"
             >
               <option value="">All Statuses</option>
               <option value="DRILLING">DRILLING (Active)</option>
@@ -279,13 +291,13 @@ export default function WellsPage() {
 
           {/* 3. Well Type Filter */}
           <div>
-            <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">
+            <label className="block text-[10px] font-mono uppercase text-black font-black mb-1">
               Well Purpose
             </label>
             <select
               value={wellTypeFilter}
               onChange={(e) => setWellTypeFilter(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 outline-none focus:border-emerald-500"
+              className="w-full bg-[#f8f8fb] border-2 border-black rounded-xl px-2.5 py-2 text-xs font-mono font-bold text-black outline-none shadow-[2px_2px_0px_0px_#000]"
             >
               <option value="">All Well Types</option>
               <option value="DEVELOPMENT">DEVELOPMENT</option>
@@ -296,13 +308,13 @@ export default function WellsPage() {
 
           {/* 4. Stratigraphic Formation Filter */}
           <div>
-            <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">
+            <label className="block text-[10px] font-mono uppercase text-black font-black mb-1">
               Formation Horizon
             </label>
             <select
               value={formationFilter}
               onChange={(e) => setFormationFilter(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 outline-none focus:border-emerald-500"
+              className="w-full bg-[#f8f8fb] border-2 border-black rounded-xl px-2.5 py-2 text-xs font-mono font-bold text-black outline-none shadow-[2px_2px_0px_0px_#000]"
             >
               <option value="">All Formations</option>
               <option value="Barail">Barail Sandstone</option>
@@ -315,13 +327,13 @@ export default function WellsPage() {
 
           {/* 5. Depth Range Filter */}
           <div>
-            <label className="block text-[10px] font-mono uppercase text-slate-400 mb-1">
+            <label className="block text-[10px] font-mono uppercase text-black font-black mb-1">
               Depth Interval
             </label>
             <select
               value={depthFilter}
               onChange={(e) => setDepthFilter(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 outline-none focus:border-emerald-500"
+              className="w-full bg-[#f8f8fb] border-2 border-black rounded-xl px-2.5 py-2 text-xs font-mono font-bold text-black outline-none shadow-[2px_2px_0px_0px_#000]"
             >
               <option value="">All Depths</option>
               <option value="SHALLOW">&lt; 3,000m (Shallow)</option>
@@ -332,23 +344,23 @@ export default function WellsPage() {
         </div>
 
         {/* Second Row: Hazard Precedent Toggle & Result Count */}
-        <div className="flex flex-wrap items-center justify-between pt-2 border-t border-slate-800/80 gap-3 text-xs">
+        <div className="flex flex-wrap items-center justify-between pt-3 border-t-2 border-black gap-3 text-xs">
           <label className="flex items-center space-x-2 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={onlyHazards}
               onChange={(e) => setOnlyHazards(e.target.checked)}
-              className="rounded bg-slate-950 border-slate-700 text-emerald-600 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5"
+              className="rounded border-2 border-black text-black w-4 h-4 cursor-pointer"
             />
-            <span className="text-slate-300 font-medium">
+            <span className="text-black font-bold">
               Filter to Wells with Historical Precedent Incidents (Stuck Pipe, Losses, Kicks)
             </span>
           </label>
 
-          <div className="text-xs font-mono text-slate-400 flex items-center space-x-2">
+          <div className="text-xs font-mono text-zinc-600 flex items-center space-x-2">
             <span>Filtered Wells:</span>
-            <span className="font-bold text-emerald-400 text-sm">{filteredWells.length}</span>
-            <span>of {wells.length} Total</span>
+            <span className="font-black text-black text-sm px-2 py-0.5 bg-[#fef3c7] border border-black rounded shadow-[1px_1px_0px_0px_#000]">{filteredWells.length}</span>
+            <span className="font-bold">of {wells.length} Total</span>
           </div>
         </div>
       </div>
@@ -377,38 +389,38 @@ export default function WellsPage() {
           />
 
           {/* Complementary Results Table */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
-            <div className="p-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-              <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+          <div className="bg-white border-2 border-black rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_#000]">
+            <div className="p-4 bg-[#f8f8fb] border-b-2 border-black flex items-center justify-between">
+              <span className="text-xs font-black text-black uppercase tracking-wider font-mono">
                 Matching Wells Directory ({filteredWells.length})
               </span>
-              <span className="text-[11px] font-mono text-slate-400">Click a well to view full dossier</span>
+              <span className="text-[11px] font-mono font-bold text-zinc-600">Click a well to view full dossier</span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950/80 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800 font-mono">
+                <thead className="bg-[#f4f4f6] text-black uppercase tracking-wider text-[10px] border-b-2 border-black font-mono font-black">
                   <tr>
-                    <th className="py-2.5 px-4">Well ID</th>
-                    <th className="py-2.5 px-4">Name</th>
-                    <th className="py-2.5 px-4">Field</th>
-                    <th className="py-2.5 px-4">Type</th>
-                    <th className="py-2.5 px-4">Total Depth</th>
-                    <th className="py-2.5 px-4">Coordinates</th>
-                    <th className="py-2.5 px-4">Status</th>
-                    <th className="py-2.5 px-4 text-right">Action</th>
+                    <th className="py-3 px-4 font-black">Well ID</th>
+                    <th className="py-3 px-4 font-black">Name</th>
+                    <th className="py-3 px-4 font-black">Field</th>
+                    <th className="py-3 px-4 font-black">Type</th>
+                    <th className="py-3 px-4 font-black">Total Depth</th>
+                    <th className="py-3 px-4 font-black">Coordinates</th>
+                    <th className="py-3 px-4 font-black">Status</th>
+                    <th className="py-3 px-4 text-right font-black">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800 font-mono text-[11px]">
+                <tbody className="divide-y-2 divide-zinc-200 font-mono text-[11px]">
                   {loading ? (
                     <tr>
-                      <td colSpan={8} className="py-8 text-center text-slate-400">
+                      <td colSpan={8} className="py-8 text-center text-zinc-500 font-bold">
                         Loading well directory...
                       </td>
                     </tr>
                   ) : filteredWells.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-8 text-center text-slate-400">
+                      <td colSpan={8} className="py-8 text-center text-zinc-500 font-bold">
                         No wells found matching the current filter criteria.
                       </td>
                     </tr>
@@ -421,37 +433,37 @@ export default function WellsPage() {
                           onClick={() => setSelectedWellId(w.wellId)}
                           className={`cursor-pointer transition-colors ${
                             isSelected
-                              ? 'bg-slate-800/80 border-l-2 border-emerald-500'
-                              : 'hover:bg-slate-800/50'
+                              ? 'bg-[#dbeafe] border-l-4 border-black'
+                              : 'hover:bg-zinc-100/70'
                           }`}
                         >
-                          <td className="py-2.5 px-4 font-bold text-emerald-400">
+                          <td className="py-3 px-4 font-black text-blue-900">
                             {w.wellId}
                           </td>
-                          <td className="py-2.5 px-4 text-slate-200 font-sans font-medium">{w.name}</td>
-                          <td className="py-2.5 px-4 text-slate-400 font-sans">{w.field}</td>
-                          <td className="py-2.5 px-4 text-slate-300">{w.wellType}</td>
-                          <td className="py-2.5 px-4 text-slate-200">{w.totalDepth} m</td>
-                          <td className="py-2.5 px-4 text-slate-400">
+                          <td className="py-3 px-4 text-black font-sans font-bold">{w.name}</td>
+                          <td className="py-3 px-4 text-zinc-700 font-sans">{w.field}</td>
+                          <td className="py-3 px-4 text-zinc-800 font-bold">{w.wellType}</td>
+                          <td className="py-3 px-4 text-black font-black">{w.totalDepth} m</td>
+                          <td className="py-3 px-4 text-zinc-600">
                             {w.latitude.toFixed(3)}°N, {w.longitude.toFixed(3)}°E
                           </td>
-                          <td className="py-2.5 px-4">
+                          <td className="py-3 px-4">
                             <span
-                              className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border-2 border-black shadow-[2px_2px_0px_0px_#000] ${
                                 w.status === 'DRILLING'
-                                  ? 'bg-blue-950 text-blue-300 border border-blue-800'
+                                  ? 'bg-[#dbeafe] text-[#1e3a8a]'
                                   : w.status === 'COMPLETED'
-                                  ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                                  : 'bg-slate-800 text-slate-300'
+                                  ? 'bg-[#d1fae5] text-[#064e3b]'
+                                  : 'bg-zinc-100 text-zinc-700'
                               }`}
                             >
                               {w.status}
                             </span>
                           </td>
-                          <td className="py-2.5 px-4 text-right">
+                          <td className="py-3 px-4 text-right">
                             <a
                               href={`/wells/${w.wellId}`}
-                              className="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-600 text-slate-200 hover:text-white transition-colors text-[10px] font-sans font-medium"
+                              className="px-3 py-1 rounded-xl bg-white hover:bg-black text-black hover:text-white border-2 border-black shadow-[2px_2px_0px_0px_#000] transition-all text-[11px] font-sans font-bold inline-block"
                             >
                               Dossier →
                             </a>
@@ -467,66 +479,66 @@ export default function WellsPage() {
         </div>
       ) : (
         /* Table View */
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border-2 border-black rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_#000]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950/80 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800 font-mono">
+              <thead className="bg-[#f4f4f6] text-black uppercase tracking-wider text-[10px] border-b-2 border-black font-mono font-black">
                 <tr>
-                  <th className="py-3 px-4">Well ID</th>
-                  <th className="py-3 px-4">Name</th>
-                  <th className="py-3 px-4">Field</th>
-                  <th className="py-3 px-4">Type</th>
-                  <th className="py-3 px-4">Total Depth</th>
-                  <th className="py-3 px-4">Coordinates</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4 font-black">Well ID</th>
+                  <th className="py-3.5 px-4 font-black">Name</th>
+                  <th className="py-3.5 px-4 font-black">Field</th>
+                  <th className="py-3.5 px-4 font-black">Type</th>
+                  <th className="py-3.5 px-4 font-black">Total Depth</th>
+                  <th className="py-3.5 px-4 font-black">Coordinates</th>
+                  <th className="py-3.5 px-4 font-black">Status</th>
+                  <th className="py-3.5 px-4 text-right font-black">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 font-mono text-[11px]">
+              <tbody className="divide-y-2 divide-zinc-200 font-mono text-[11px]">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-slate-400">
+                    <td colSpan={8} className="py-8 text-center text-zinc-500 font-bold">
                       Loading well directory...
                     </td>
                   </tr>
                 ) : filteredWells.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-slate-400">
+                    <td colSpan={8} className="py-8 text-center text-zinc-500 font-bold">
                       No wells found matching the criteria.
                     </td>
                   </tr>
                 ) : (
                   filteredWells.map((w) => (
-                    <tr key={w.id} className="hover:bg-slate-800/60 transition-colors">
-                      <td className="py-3 px-4 font-bold text-white">
-                        <a href={`/wells/${w.wellId}`} className="text-emerald-400 hover:underline">
+                    <tr key={w.id} className="hover:bg-zinc-100/70 transition-colors">
+                      <td className="py-3.5 px-4 font-black">
+                        <a href={`/wells/${w.wellId}`} className="text-blue-900 hover:underline">
                           {w.wellId}
                         </a>
                       </td>
-                      <td className="py-3 px-4 text-slate-200 font-sans font-medium">{w.name}</td>
-                      <td className="py-3 px-4 text-slate-400 font-sans">{w.field}</td>
-                      <td className="py-3 px-4 text-slate-300">{w.wellType}</td>
-                      <td className="py-3 px-4 text-slate-200">{w.totalDepth} m</td>
-                      <td className="py-3 px-4 text-slate-400">
+                      <td className="py-3.5 px-4 text-black font-sans font-bold">{w.name}</td>
+                      <td className="py-3.5 px-4 text-zinc-700 font-sans">{w.field}</td>
+                      <td className="py-3.5 px-4 text-zinc-800 font-bold">{w.wellType}</td>
+                      <td className="py-3.5 px-4 text-black font-black">{w.totalDepth} m</td>
+                      <td className="py-3.5 px-4 text-zinc-600">
                         {w.latitude.toFixed(3)}°N, {w.longitude.toFixed(3)}°E
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3.5 px-4">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border-2 border-black shadow-[2px_2px_0px_0px_#000] ${
                             w.status === 'DRILLING'
-                              ? 'bg-blue-950 text-blue-300 border border-blue-800'
+                              ? 'bg-[#dbeafe] text-[#1e3a8a]'
                               : w.status === 'COMPLETED'
-                              ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                              : 'bg-slate-800 text-slate-300'
+                              ? 'bg-[#d1fae5] text-[#064e3b]'
+                              : 'bg-zinc-100 text-zinc-700'
                           }`}
                         >
                           {w.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3.5 px-4 text-right">
                         <a
                           href={`/wells/${w.wellId}`}
-                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-600 text-slate-200 hover:text-white transition-colors text-[11px] font-sans font-medium"
+                          className="px-3 py-1 rounded-xl bg-white hover:bg-black text-black hover:text-white border-2 border-black shadow-[2px_2px_0px_0px_#000] transition-all text-[11px] font-sans font-bold inline-block"
                         >
                           Inspect Dossier &rarr;
                         </a>

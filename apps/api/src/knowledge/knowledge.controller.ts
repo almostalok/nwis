@@ -2,16 +2,27 @@ import { Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { KnowledgeService } from './knowledge.service';
 
+import { DocumentQueueService } from './document-queue.service';
+
 @ApiTags('Knowledge & Document Intelligence')
 @Controller('api/v1/knowledge')
 export class KnowledgeController {
-  constructor(private readonly knowledgeService: KnowledgeService) {}
+  constructor(
+    private readonly knowledgeService: KnowledgeService,
+    private readonly documentQueue: DocumentQueueService,
+  ) {}
 
   @Get('documents')
   @ApiOperation({ summary: 'List all drilling reports, processing states, and entity counts' })
   @ApiQuery({ name: 'wellId', required: false })
   async listDocuments(@Query('wellId') wellId?: string) {
     return this.knowledgeService.listDocuments(wellId);
+  }
+
+  @Get('queue/status')
+  @ApiOperation({ summary: 'Get status of the Redis/async document processing queue and worker' })
+  getQueueStatus() {
+    return this.documentQueue.getQueueStatus();
   }
 
   @Get('documents/:id')
@@ -27,9 +38,21 @@ export class KnowledgeController {
   }
 
   @Post('process/:id')
-  @ApiOperation({ summary: 'Process a single document through the Stage 02 knowledge pipeline' })
+  @ApiOperation({ summary: 'Process a single document synchronously through the knowledge pipeline' })
   async processDocument(@Param('id') id: string) {
     return this.knowledgeService.processDocument(id);
+  }
+
+  @Post('process/:id/queue')
+  @ApiOperation({ summary: 'Enqueue a document for asynchronous processing via Redis/BullMQ worker' })
+  async enqueueDocument(@Param('id') id: string) {
+    const jobId = await this.documentQueue.enqueue(id);
+    return {
+      success: true,
+      jobId,
+      documentId: id,
+      message: 'Document enqueued for processing',
+    };
   }
 
   @Post('entities/:id/verify')

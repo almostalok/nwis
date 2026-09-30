@@ -43,8 +43,28 @@ export class LocalStorageService implements IStorageProvider {
     };
   }
 
+  /**
+   * Resolves and verifies that a storage path remains strictly within the base storage directory.
+   * Defends against directory traversal (../, absolute paths, null bytes, encoded paths).
+   */
+  private resolveSafePath(storagePath: string): string {
+    if (!storagePath || typeof storagePath !== 'string') {
+      throw new Error('Invalid storage path');
+    }
+    if (storagePath.includes('\0')) {
+      throw new Error('Path traversal violation: Illegal character detected');
+    }
+    const normalizedBase = path.resolve(this.baseStorageDir);
+    const resolvedPath = path.resolve(this.baseStorageDir, storagePath);
+
+    if (!resolvedPath.startsWith(normalizedBase + path.sep) && resolvedPath !== normalizedBase) {
+      throw new Error(`Path traversal violation: Access outside storage directory is forbidden: ${storagePath}`);
+    }
+    return resolvedPath;
+  }
+
   async getFile(storagePath: string): Promise<Uint8Array> {
-    const fullPath = path.join(this.baseStorageDir, storagePath);
+    const fullPath = this.resolveSafePath(storagePath);
     if (!fs.existsSync(fullPath)) {
       throw new Error(`File not found at path: ${storagePath}`);
     }
@@ -52,7 +72,7 @@ export class LocalStorageService implements IStorageProvider {
   }
 
   async deleteFile(storagePath: string): Promise<boolean> {
-    const fullPath = path.join(this.baseStorageDir, storagePath);
+    const fullPath = this.resolveSafePath(storagePath);
     if (fs.existsSync(fullPath)) {
       await fs.promises.unlink(fullPath);
       return true;

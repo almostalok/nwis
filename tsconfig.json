@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nwis/types": ["./packages/types/src/index.ts"],
+      "@nwis/types/*": ["./packages/types/src/*"],
+      "@nwis/database": ["./packages/database/src/index.ts"],
+      "@nwis/database/*": ["./packages/database/src/*"],
+      "@nwis/utils": ["./packages/utils/src/index.ts"],
+      "@nwis/utils/*": ["./packages/utils/src/*"],
+      "@nwis/validation": ["./packages/validation/src/index.ts"],
+      "@nwis/validation/*": ["./packages/validation/src/*"],
+      "@nwis/api-client": ["./packages/api-client/src/index.ts"],
+      "@nwis/api-client/*": ["./packages/api-client/src/*"]
+    }
+  }
+}

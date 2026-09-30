@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
 export default function IntegrationsPage() {
   const adapters = [
@@ -59,39 +60,49 @@ export default function IntegrationsPage() {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border-2 border-black rounded-2xl p-6 shadow-[4px_4px_0px_0px_#000]">
         <div>
+          <div className="flex items-center space-x-2 text-xs font-mono font-bold text-zinc-500 mb-1">
+            <Link href="/dashboard" className="text-blue-700 hover:underline">
+              ← Command Center
+            </Link>
+            <span>/</span>
+            <span>Operations</span>
+            <span>/</span>
+            <span className="text-black font-bold">Integrations</span>
+          </div>
+
           <div className="flex items-center space-x-2">
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-950 text-blue-300 border border-blue-800 uppercase tracking-wider font-mono">
-              Enterprise Integration Architecture
+            <span className="px-3 py-1 rounded-full text-xs font-black bg-[#dbeafe] text-[#1e3a8a] border-2 border-black shadow-[2px_2px_0px_0px_#000] uppercase tracking-wider font-mono">
+              ENTERPRISE INTEGRATION ARCHITECTURE
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800 uppercase tracking-wider font-mono">
-              eRTMAC Compatible
+            <span className="px-3 py-1 rounded-full text-xs font-black bg-[#d1fae5] text-[#064e3b] border-2 border-black shadow-[2px_2px_0px_0px_#000] uppercase tracking-wider font-mono">
+              eRTMAC COMPATIBLE
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight mt-1">
+          <h1 className="text-2xl font-black text-black tracking-tight mt-2">
             OIL / eRTMAC Ecosystem Integrations
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Technical interface specifications for seamless deployment into Oil India Limited IT/OT infrastructure
+          <p className="text-xs text-zinc-600 mt-1">
+            Technical interface specifications for seamless deployment into Oil India Limited IT/OT infrastructure.
           </p>
         </div>
 
-        <div className="bg-slate-950 px-4 py-2 rounded-lg border border-slate-800 text-right">
-          <span className="text-[10px] text-slate-500 font-mono uppercase block">Integration State</span>
-          <span className="text-sm font-bold text-emerald-400 font-mono">STANDBY READY</span>
+        <div className="bg-[#f8f9fa] px-5 py-3 rounded-2xl border-2 border-black shadow-[3px_3px_0px_0px_#000] text-right">
+          <span className="text-[10px] text-zinc-500 font-mono uppercase font-black block">Integration State</span>
+          <span className="text-sm font-black text-[#064e3b] font-mono">STANDBY READY</span>
         </div>
       </div>
 
       {/* Production Authorization Notice */}
-      <div className="bg-amber-950/40 border border-amber-800/80 rounded-xl p-5 text-xs text-amber-200 space-y-2">
-        <div className="font-bold text-amber-100 uppercase tracking-wider flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <span>PRODUCTION INTEGRATION READINESS DECLARATION</span>
+      <div className="bg-[#fffbeb] border-2 border-black rounded-2xl p-5 text-xs text-black shadow-[4px_4px_0px_0px_#000] space-y-2">
+        <div className="font-black text-[#78350f] uppercase tracking-wider flex items-center space-x-2 font-mono">
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse border border-black"></span>
+          <span>Production Integration Readiness Declaration</span>
         </div>
-        <p className="leading-relaxed">
+        <p className="leading-relaxed font-semibold">
           The NWIS codebase contains dedicated adapter abstractions (<code>ERTMACAdapter</code>,{' '}
           <code>WITSMLLiveAdapter</code>, <code>DocumentLakeAdapter</code>) engineered to OIL specifications.
           In accordance with cybersecurity protocols and hackathon guidelines, live production hookup to OIL
@@ -101,13 +112,14 @@ export default function IntegrationsPage() {
       </div>
 
       {/* Architecture Topology */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-md space-y-4">
-        <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
+      <div className="bg-white border-2 border-black rounded-2xl p-6 shadow-[4px_4px_0px_0px_#000] space-y-4">
+        <h2 className="text-xs font-black text-black uppercase tracking-wider font-mono flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-blue-600 border border-black" />
           System Integration Topology
         </h2>
 
-        <div className="bg-slate-950 p-5 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto">
-          <pre className="leading-relaxed">
+        <div className="bg-[#f8f9fa] p-5 rounded-xl border-2 border-black font-mono text-xs text-black overflow-x-auto shadow-[2px_2px_0px_0px_#000]">
+          <pre className="leading-relaxed font-bold">
 {`+-----------------------------------------------------------------------------------+
 |                        OIL INDIA LIMITED RIG ENVIRONMENT                          |
 |                                                                                   |
@@ -147,39 +159,39 @@ export default function IntegrationsPage() {
         {adapters.map((adapter) => (
           <div
             key={adapter.name}
-            className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-3"
+            className="bg-white border-2 border-black rounded-2xl p-6 shadow-[4px_4px_0px_0px_#000] space-y-3"
           >
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-white text-sm">{adapter.name}</h3>
-                <span className="text-[10px] text-slate-400 font-mono">{adapter.standard}</span>
+                <h3 className="font-black text-black text-base">{adapter.name}</h3>
+                <span className="text-xs text-zinc-600 font-mono font-bold">{adapter.standard}</span>
               </div>
               <span
-                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                className={`px-3 py-1 rounded-full text-[10px] font-mono font-black border-2 border-black shadow-[1.5px_1.5px_0px_0px_#000] ${
                   adapter.status === 'ENFORCED'
-                    ? 'bg-blue-950 text-blue-300 border border-blue-800'
-                    : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                    ? 'bg-[#dbeafe] text-[#1e3a8a]'
+                    : 'bg-[#d1fae5] text-[#064e3b]'
                 }`}
               >
                 {adapter.status}
               </span>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">{adapter.purpose}</p>
+            <p className="text-xs text-black leading-relaxed font-semibold">{adapter.purpose}</p>
 
-            <div className="space-y-1 pt-2 border-t border-slate-800">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono block">
+            <div className="space-y-1.5 pt-3 border-t-2 border-black/10">
+              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-600 font-mono block">
                 Technical Specifications:
               </span>
-              <ul className="text-xs text-slate-400 space-y-1 list-disc list-inside">
+              <ul className="text-xs text-zinc-800 space-y-1 list-disc list-inside font-medium">
                 {adapter.specs.map((spec, i) => (
                   <li key={i}>{spec}</li>
                 ))}
               </ul>
             </div>
 
-            <div className="bg-slate-950 p-2.5 rounded border border-slate-800 text-[11px] text-slate-300 font-mono mt-3">
-              <span className="text-emerald-400 font-bold">Status:</span> {adapter.readiness}
+            <div className="bg-[#f8f9fa] p-3.5 rounded-xl border-2 border-black text-xs text-black font-mono mt-3 shadow-[2px_2px_0px_0px_#000]">
+              <span className="text-[#064e3b] font-black">Status:</span> {adapter.readiness}
             </div>
           </div>
         ))}

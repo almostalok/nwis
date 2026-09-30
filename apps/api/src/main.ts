@@ -11,9 +11,24 @@ async function bootstrap() {
   const logger = new Logger('NWIS-API-Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS for frontend web application
+  // Enable CORS for frontend web application with explicit origin whitelist
+  const allowedOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+    : [
+        process.env.FRONTEND_URL || 'http://localhost:3000',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+      ];
+
   app.enableCors({
-    origin: '*',
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // Allow requests with no origin (e.g. curl, server-to-server, health probes)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || (process.env.NODE_ENV !== 'production' && origin.startsWith('http://localhost'))) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS policy rejection: Origin ${origin} not allowed`), false);
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

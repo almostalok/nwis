@@ -52,8 +52,8 @@ async function main() {
     },
   });
 
-  // 2. Seed Demo RBAC Users (Password: "password123")
-  const defaultPasswordHash = CryptoUtils.sha256('password123');
+  // 2. Seed Demo RBAC Users (Password: "password123", hashed with bcrypt 10 rounds)
+  const defaultPasswordHash = await CryptoUtils.hashPassword('password123');
 
   const demoUsers = [
     { email: 'admin@nwis.oil.in', name: 'Alok (System Administrator)', role: UserRole.ADMIN, department: 'Digital Transformation & IT' },

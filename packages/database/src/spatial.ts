@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { NearbyWellResult, WellStatus, WellType } from '@nwis/types';
 import { SpatialUtils } from '@nwis/utils';
 
@@ -18,6 +18,7 @@ export class SpatialRepository {
   /**
    * Queries nearby wells within radiusKm of (latitude, longitude).
    * Supports PostGIS ST_DWithin/ST_Distance, PostgreSQL earthdistance, or indexed bounding-box.
+   * Strictly parameterized with Prisma.sql to prevent SQL injection.
    */
   private hasPostgis: boolean | null = null;
   private hasEarthdistance: boolean | null = null;
@@ -25,9 +26,9 @@ export class SpatialRepository {
   private async detectExtensions(): Promise<void> {
     if (this.hasPostgis === null) {
       try {
-        const ext: any[] = await this.prisma.$queryRawUnsafe(`
+        const ext: any[] = await this.prisma.$queryRaw`
           SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'earthdistance');
-        `);
+        `;
         const names = ext.map((e) => e.extname);
         this.hasPostgis = names.includes('postgis');
         this.hasEarthdistance = names.includes('earthdistance');
@@ -42,9 +43,13 @@ export class SpatialRepository {
     const { latitude, longitude, radiusKm, formation, status, wellType, limit = 20 } = params;
     await this.detectExtensions();
 
+    const statusClause = status ? Prisma.sql`AND w.status = ${status}::"WellStatus"` : Prisma.empty;
+    const wellTypeClause = wellType ? Prisma.sql`AND w."wellType" = ${wellType}::"WellType"` : Prisma.empty;
+    const radiusMeters = radiusKm * 1000.0;
+
     if (this.hasPostgis) {
       try {
-        const rawResults: any[] = await this.prisma.$queryRawUnsafe(`
+        const rawResults: any[] = await this.prisma.$queryRaw`
           SELECT 
             w.id,
             w."wellId",
@@ -63,13 +68,13 @@ export class SpatialRepository {
           WHERE ST_DWithin(
             ST_SetSRID(ST_MakePoint(w.longitude, w.latitude), 4326)::geography,
             ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography,
-            ${radiusKm * 1000.0}
+            ${radiusMeters}
           )
-          ${status ? `AND w.status = '${status}'` : ''}
-          ${wellType ? `AND w."wellType" = '${wellType}'` : ''}
+          ${statusClause}
+          ${wellTypeClause}
           ORDER BY "distanceKm" ASC
           LIMIT ${limit};
-        `);
+        `;
 
         return this.enrichWellResults(rawResults, formation);
       } catch {
@@ -79,7 +84,7 @@ export class SpatialRepository {
 
     if (this.hasEarthdistance) {
       try {
-        const rawResults: any[] = await this.prisma.$queryRawUnsafe(`
+        const rawResults: any[] = await this.prisma.$queryRaw`
           SELECT 
             w.id,
             w."wellId",
@@ -92,12 +97,12 @@ export class SpatialRepository {
             w."wellType",
             (earth_distance(ll_to_earth(w.latitude, w.longitude), ll_to_earth(${latitude}, ${longitude})) / 1000.0) AS "distanceKm"
           FROM wells w
-          WHERE earth_distance(ll_to_earth(w.latitude, w.longitude), ll_to_earth(${latitude}, ${longitude})) <= (${radiusKm * 1000.0})
-          ${status ? `AND w.status = '${status}'` : ''}
-          ${wellType ? `AND w."wellType" = '${wellType}'` : ''}
+          WHERE earth_distance(ll_to_earth(w.latitude, w.longitude), ll_to_earth(${latitude}, ${longitude})) <= ${radiusMeters}
+          ${statusClause}
+          ${wellTypeClause}
           ORDER BY "distanceKm" ASC
           LIMIT ${limit};
-        `);
+        `;
 
         return this.enrichWellResults(rawResults, formation);
       } catch {

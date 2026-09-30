@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { OCRProvider } from './ocr.provider';
+// @ts-ignore
+import { PDFParse } from 'pdf-parse';
 
 export interface ExtractedPage {
   pageNumber: number;
@@ -19,6 +21,7 @@ export class DocumentExtractorService {
 
   /**
    * Extracts text preserving page boundaries from a document file path.
+   * Supports both binary PDF inputs and structured text/markdown documents.
    */
   async extractPages(filePath: string): Promise<ExtractedPage[]> {
     this.logger.log(`Extracting pages from document: ${filePath}`);
@@ -43,7 +46,70 @@ export class DocumentExtractorService {
       }
     }
 
-    const rawContent = fs.readFileSync(resolvedPath, 'utf-8');
+    const buffer = fs.readFileSync(resolvedPath);
+    const isPdf =
+      filePath.toLowerCase().endsWith('.pdf') ||
+      (buffer.length >= 5 && buffer.slice(0, 5).toString('ascii') === '%PDF-');
+
+    // 1. Handle Binary PDF files
+    if (isPdf) {
+      try {
+        const parser = new (PDFParse as any)(new Uint8Array(buffer));
+        const parsed = await parser.getText();
+        const rawPages = (parsed && parsed.pages && parsed.pages.length > 0)
+          ? parsed.pages.map((p: any) => p.text || '')
+          : (parsed?.text || '').split(/\f/).filter((p: string) => p.trim().length > 0);
+
+        if (rawPages.length > 0) {
+          const pages: ExtractedPage[] = [];
+          for (let i = 0; i < rawPages.length; i++) {
+            const pageText = rawPages[i].trim();
+            const words = pageText.split(/\s+/).filter((w: string) => w.length > 0);
+
+            // If page text is very sparse (< 10 words), run OCR on the buffer
+            if (words.length < 10) {
+              const ocrRes = await this.ocrProvider.extractTextFromPage(
+                `${filePath}#page=${i + 1}`,
+                buffer,
+              );
+              pages.push({
+                pageNumber: i + 1,
+                text: ocrRes.text || pageText,
+                confidence: ocrRes.confidence,
+                wordCount: ocrRes.wordCount || words.length,
+                isOcr: true,
+              });
+            } else {
+              pages.push({
+                pageNumber: i + 1,
+                text: pageText,
+                confidence: 0.98,
+                wordCount: words.length,
+                isOcr: false,
+              });
+            }
+          }
+          return pages;
+        }
+      } catch (pdfErr: any) {
+        this.logger.warn(
+          `Binary PDF parser error for ${filePath}: ${pdfErr.message}, falling back to OCR provider`,
+        );
+        const ocrRes = await this.ocrProvider.extractTextFromPage(filePath, buffer);
+        return [
+          {
+            pageNumber: 1,
+            text: ocrRes.text,
+            confidence: ocrRes.confidence,
+            wordCount: ocrRes.wordCount,
+            isOcr: true,
+          },
+        ];
+      }
+    }
+
+    // 2. Handle Structured Text / Markdown documents
+    const rawContent = buffer.toString('utf-8');
 
     // Check for explicit page separators (e.g. "=== PAGE 1 ===" or form feed "\f")
     const formFeedPages = rawContent.split(/\f/);
